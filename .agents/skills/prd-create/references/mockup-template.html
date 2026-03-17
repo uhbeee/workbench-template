@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title><!-- SCREEN TITLE --></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        spacing: {
+          '0': '0px',
+          '0.25': '2px',
+          '0.5': '4px',
+          '0.75': '6px',
+          '1': '8px',
+          '1.25': '10px',
+          '1.5': '12px',
+          '1.75': '14px',
+          '2': '16px',
+          '2.5': '20px',
+          '2.75': '22px',
+          '3': '24px',
+          '3.5': '28px',
+          '4': '32px',
+          '4.5': '36px',
+          '5': '40px',
+          '6': '48px',
+          '7': '56px',
+          '8': '64px',
+          '9': '72px',
+        },
+        borderRadius: {
+          'none': '0',
+          'xs': '2px',
+          'sm': '4px',
+          'md': '6px',
+          'lg': '8px',
+          'xl': '12px',
+          'full': '9999px',
+        },
+        boxShadow: {
+          'sm': '0px 3px 6px 0px rgba(0,0,0,0.02)',
+          'md': '0px 2px 11px 0px rgba(0,0,0,0.05)',
+          'lg': '0px 1px 16px 0px rgba(0,0,0,0.07)',
+          'xl': '0px 1px 21px 0px rgba(0,0,0,0.10)',
+          'overlay': '0px 0px 26px 0px rgba(0,0,0,0.12)',
+          'none': 'none',
+        },
+        extend: {
+          colors: {
+            background: 'var(--background)',
+            foreground: 'var(--foreground)',
+            card: { DEFAULT: 'var(--card)', foreground: 'var(--card-foreground)' },
+            primary: { DEFAULT: 'var(--primary)', foreground: 'var(--primary-foreground)', 100: '#ebdeff', 200: '#d8b3ff', 300: '#ac65f2', 400: '#9e00f0', 500: '#781fb3', 600: '#4f0064', 700: '#410a5a' },
+            secondary: { DEFAULT: 'var(--secondary)', foreground: 'var(--secondary-foreground)', 100: '#ffcdaf', 200: '#ffae7b', 300: '#ff983b', 400: '#ff7d00', 500: '#ff5c00', 600: '#fd3f00', 700: '#bf2300' },
+            muted: { DEFAULT: 'var(--muted)', foreground: 'var(--muted-foreground)' },
+            accent: { DEFAULT: 'var(--accent)', foreground: 'var(--accent-foreground)' },
+            destructive: { DEFAULT: 'var(--destructive)', foreground: 'var(--destructive-foreground)' },
+            success: { DEFAULT: 'var(--success)', foreground: 'var(--success-foreground)' },
+            warning: { DEFAULT: 'var(--warning)', foreground: 'var(--warning-foreground)' },
+            border: 'var(--border)',
+            input: 'var(--input)',
+            ring: 'var(--ring)',
+            neutral: { 100: '#f9f9f9', 200: '#f5f5f5', 300: '#ececeb', 400: '#e2e2e2', 500: '#8a8a8a', 600: '#666666', 700: '#2e2e2e', 800: '#1e1e1e', 900: '#181818', 1000: '#121212' },
+            tertiary: { 100: '#fdfcfb', 200: '#faf8f6', 300: '#f6f1eb', 400: '#ebe4db', 500: '#ebe4db', 600: '#e4dace', 700: '#dcd0c1' },
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    :root {
+      --background: #faf8f6;
+      --foreground: #2e2e2e;
+      --card: #ffffff;
+      --card-foreground: #2e2e2e;
+      --primary: #781fb3;
+      --primary-foreground: #ffffff;
+      --secondary: #ff5c00;
+      --secondary-foreground: #ffffff;
+      --muted: #ececeb;
+      --muted-foreground: #8a8a8a;
+      --accent: #f1f5f9;
+      --accent-foreground: #0f172a;
+      --destructive: #ef4444;
+      --destructive-foreground: #f8fafc;
+      --success: #9bebd3;
+      --success-foreground: #2e2e2e;
+      --warning: #ffd5d2;
+      --warning-foreground: #2e2e2e;
+      --border: #e2e2e2;
+      --input: #f9f9f9;
+      --ring: #2e2e2e;
+    }
+
+    * { border-color: var(--border); }
+    body {
+      background-color: var(--background);
+      color: var(--foreground);
+      font-family: -apple-system, BlinkMacSystemFont, 'San Francisco', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    /* Typography utilities — matches UI2 design system */
+    .text-display-lg { font-size: 3.625rem; font-weight: 700; line-height: 120%; }
+    .text-display-md { font-size: 2.875rem; font-weight: 700; line-height: 120%; }
+    .text-display-sm { font-size: 2.125rem; font-weight: 700; line-height: 120%; }
+    .text-header-lg  { font-size: 1.75rem;  font-weight: 500; line-height: 120%; }
+    .text-header-md  { font-size: 1.5rem;   font-weight: 500; line-height: 120%; }
+    .text-header-sm  { font-size: 1.25rem;  font-weight: 500; line-height: 120%; }
+    .text-title-lg   { font-size: 1.125rem; font-weight: 600; line-height: 135%; }
+    .text-title-md   { font-size: 1rem;     font-weight: 600; line-height: 135%; }
+    .text-title-sm   { font-size: 0.875rem; font-weight: 600; line-height: 135%; }
+    .text-body-lg    { font-size: 1rem;     font-weight: 400; line-height: 135%; }
+    .text-body-md    { font-size: 0.875rem; font-weight: 400; line-height: 135%; }
+    .text-body-sm    { font-size: 0.75rem;  font-weight: 400; line-height: 135%; }
+    .text-label-lg   { font-size: 1rem;     font-weight: 500; line-height: 1; }
+    .text-label-md   { font-size: 0.875rem; font-weight: 500; line-height: 1; }
+    .text-label-sm   { font-size: 0.75rem;  font-weight: 500; line-height: 1; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="mx-auto max-w-[1200px] px-4 py-6">
+    <!-- CONTENT: Replace this comment with screen content -->
+
+    <!--
+    ============================================================
+    COMPONENT RECIPES — Copy and adapt these patterns
+    ============================================================
+
+    === CARD ===
+    <div class="flex flex-col gap-2 rounded-lg border py-2 shadow-sm bg-card text-card-foreground">
+      <div class="grid auto-rows-min items-start gap-1 px-2">
+        <div class="font-semibold leading-none">Card Title</div>
+        <div class="text-muted-foreground text-sm">Card description</div>
+      </div>
+      <div class="px-2">
+        Card content goes here
+      </div>
+      <div class="flex items-center px-2">
+        Card footer / actions
+      </div>
+    </div>
+
+    === BUTTON (primary) ===
+    <button class="inline-flex items-center justify-center gap-1 rounded-sm text-sm font-medium h-[36px] px-4 bg-primary text-primary-foreground">
+      Button Label
+    </button>
+
+    === BUTTON (outline) ===
+    <button class="inline-flex items-center justify-center gap-1 rounded-sm text-sm font-medium h-[36px] px-4 border shadow-sm bg-transparent hover:bg-accent">
+      Button Label
+    </button>
+
+    === BUTTON (destructive) ===
+    <button class="inline-flex items-center justify-center gap-1 rounded-sm text-sm font-medium h-[36px] px-4 bg-destructive text-white">
+      Delete
+    </button>
+
+    === INPUT ===
+    <input type="text" placeholder="Placeholder..." class="h-[36px] w-full rounded-sm border bg-input px-2 text-sm outline-none focus:ring-1 focus:ring-ring" />
+
+    === TEXTAREA ===
+    <textarea placeholder="Placeholder..." class="min-h-[80px] w-full rounded-sm border bg-input px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-ring"></textarea>
+
+    === SELECT ===
+    <select class="h-[36px] w-full rounded-sm border bg-input px-2 text-sm outline-none">
+      <option>Option 1</option>
+      <option>Option 2</option>
+    </select>
+
+    === BADGE ===
+    <span class="inline-flex items-center rounded-sm border px-2 py-0.5 text-xs font-medium">
+      Badge
+    </span>
+
+    === BADGE (primary) ===
+    <span class="inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-medium bg-primary text-primary-foreground">
+      Badge
+    </span>
+
+    === TABLE ===
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b">
+          <th class="px-2 py-1.5 text-left font-medium text-muted-foreground">Header</th>
+          <th class="px-2 py-1.5 text-left font-medium text-muted-foreground">Header</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b">
+          <td class="px-2 py-1.5">Cell</td>
+          <td class="px-2 py-1.5">Cell</td>
+        </tr>
+      </tbody>
+    </table>
+
+    === ALERT (info) ===
+    <div class="rounded-lg border px-2 py-1.5 text-sm bg-accent">
+      Alert message here
+    </div>
+
+    === ALERT (destructive) ===
+    <div class="rounded-lg border border-destructive/50 px-2 py-1.5 text-sm text-destructive bg-destructive/10">
+      Error message here
+    </div>
+
+    === TABS ===
+    <div>
+      <div class="flex border-b">
+        <button class="px-2 py-1 text-sm font-medium border-b-2 border-primary text-primary">Active Tab</button>
+        <button class="px-2 py-1 text-sm font-medium text-muted-foreground">Inactive Tab</button>
+      </div>
+      <div class="py-2">Tab content here</div>
+    </div>
+
+    === SEPARATOR ===
+    <hr class="border-border" />
+
+    === EMPTY STATE ===
+    <div class="flex flex-col items-center justify-center gap-2 py-8 text-center text-muted-foreground">
+      <div class="text-title-md">No items yet</div>
+      <div class="text-body-md">Description of what to do next</div>
+      <button class="inline-flex items-center justify-center gap-1 rounded-sm text-sm font-medium h-[36px] px-4 bg-primary text-primary-foreground mt-2">
+        Add First Item
+      </button>
+    </div>
+
+    === DIALOG/MODAL ===
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center">
+      <div class="bg-card rounded-lg shadow-xl w-[480px] p-3">
+        <div class="text-title-lg mb-1">Dialog Title</div>
+        <div class="text-body-md text-muted-foreground mb-3">Dialog description</div>
+        <div class="flex justify-end gap-1">
+          <button class="inline-flex items-center justify-center gap-1 rounded-sm text-sm font-medium h-[36px] px-4 border shadow-sm">Cancel</button>
+          <button class="inline-flex items-center justify-center gap-1 rounded-sm text-sm font-medium h-[36px] px-4 bg-primary text-primary-foreground">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    === SIDEBAR NAV ===
+    <nav class="w-[240px] border-r bg-card h-screen py-2 flex flex-col gap-0.5">
+      <a class="flex items-center gap-1 px-2 py-1 rounded-sm bg-accent text-accent-foreground text-sm font-medium">Active Item</a>
+      <a class="flex items-center gap-1 px-2 py-1 rounded-sm text-sm text-muted-foreground hover:bg-accent">Inactive Item</a>
+    </nav>
+
+    === PAGE WITH SIDEBAR LAYOUT ===
+    <div class="flex h-screen">
+      <nav class="w-[240px] border-r bg-card py-2">sidebar</nav>
+      <main class="flex-1 p-4 overflow-auto">main content</main>
+    </div>
+
+    ============================================================
+    -->
+  </div>
+</body>
+</html>

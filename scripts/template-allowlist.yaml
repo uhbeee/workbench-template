@@ -26,27 +26,35 @@ include:
   - .agents/skills/log-interrupt/
   - .agents/skills/meeting-prep/
   - .agents/skills/morning-triage/
+  - .agents/skills/add-skill/
+  - .agents/skills/brainstorm/
+  - .agents/skills/debug-appinsights/
+  - .agents/skills/forge/
+  - .agents/skills/implement/
   - .agents/skills/plan-create/
-  - .agents/skills/plan-feature/
-  - .agents/skills/plan-resume/
   - .agents/skills/pr-context/
+  - .agents/skills/prd-create/
+  - .agents/skills/qa-check/
   - .agents/skills/quarterly-goals/
   - .agents/skills/research/
+  - .agents/skills/review-code/
+  - .agents/skills/security-scan/
   - .agents/skills/setup/
-  - .agents/skills/skill-import/
+  - .agents/skills/ship/
   - .agents/skills/slack-catch-up/
   - .agents/skills/sounding-board/
   - .agents/skills/standup/
   - .agents/skills/status-report/
+  - .agents/skills/structural-review/
   - .agents/skills/sync-permissions/
   - .agents/skills/template-sync/
+  - .agents/skills/test-suggest/
   - .agents/skills/ticket-breakdown/
   - .agents/skills/weekly-plan/
   - .agents/skills/weekly-retro/
   - .agents/skills/what-next/
   - .agents/skills/worktrees/
   - .agents/skills/wrap-up/
-  # NOTE: debug-appinsights intentionally ABSENT (company-specific)
 
   # --- Scripts (explicit, excluding private) ---
   - scripts/lib.sh
