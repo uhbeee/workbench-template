@@ -152,6 +152,23 @@ parse_yaml_value() {
   fi
 }
 
+# ─── Global Skills Helper ─────────────────────────────────────────────────
+
+SKILLS_GLOBAL_FILE="$REPO_ROOT/skills-global.yaml"
+
+# Parse the global skills list, preferring skills-global.yaml (committed),
+# falling back to config.yaml skills.global (legacy).
+parse_global_skills() {
+  if [[ -f "$SKILLS_GLOBAL_FILE" ]]; then
+    grep '^ *- ' "$SKILLS_GLOBAL_FILE" \
+      | sed 's/^ *- *//; s/ *#.*//' \
+      | tr -d '"' \
+      | tr -d "'"
+  else
+    parse_yaml_list "skills.global"
+  fi
+}
+
 # ─── Output Helpers ────────────────────────────────────────────────────────
 
 # Colored output

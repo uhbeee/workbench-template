@@ -246,6 +246,7 @@ fi
 # ─── Step 4b: Claude aliases ──────────────────────────────────────────────
 header "Claude Aliases"
 
+# Bash/Zsh aliases
 if is_windows; then
   alias_file="$HOME/.bashrc"
 else
@@ -253,7 +254,7 @@ else
 fi
 
 if [[ -f "$alias_file" ]] && grep -qF "alias cc=" "$alias_file"; then
-  pass "Claude aliases already configured"
+  pass "Claude aliases in $(basename "$alias_file") already configured"
 else
   cat >> "$alias_file" << 'CLAUDE_ALIASES'
 
@@ -264,6 +265,31 @@ CLAUDE_ALIASES
   pass "Added cc and ccd aliases to $(basename "$alias_file")"
 fi
 
+# PowerShell aliases (Windows only)
+if is_windows; then
+  ps_profile=$(powershell.exe -NoProfile -Command 'Write-Host $PROFILE' 2>/dev/null | tr -d '\r\n')
+  if [[ -n "$ps_profile" ]]; then
+    # Convert Windows path to MSYS path for file operations
+    ps_profile_unix=$(cygpath -u "$ps_profile" 2>/dev/null || echo "$ps_profile")
+    ps_profile_dir=$(dirname "$ps_profile_unix")
+
+    if [[ -f "$ps_profile_unix" ]] && grep -qF "Set-Alias cc claude" "$ps_profile_unix"; then
+      pass "Claude aliases in PowerShell profile already configured"
+    else
+      mkdir -p "$ps_profile_dir"
+      cat >> "$ps_profile_unix" << 'PS_ALIASES'
+
+# Claude Code shortcuts (added by workbench setup)
+Set-Alias cc claude
+function ccd { claude --dangerously-skip-permissions @args }
+PS_ALIASES
+      pass "Added cc and ccd aliases to PowerShell profile"
+    fi
+  else
+    warn "Could not determine PowerShell profile path — skipping PS aliases"
+  fi
+fi
+
 # ─── Step 5: Global skills ────────────────────────────────────────────────
 header "Global Skills"
 
@@ -271,10 +297,10 @@ SKILLS_SRC="$REPO_ROOT/.agents/skills"
 SKILLS_DST="$HOME/.claude/skills"
 mkdir -p "$SKILLS_DST"
 
-mapfile -t GLOBAL_SKILLS < <(parse_yaml_list "skills.global" 2>/dev/null)
+mapfile -t GLOBAL_SKILLS < <(parse_global_skills 2>/dev/null)
 
 if [[ ${#GLOBAL_SKILLS[@]} -eq 0 ]]; then
-  info "No global skills configured in config.yaml (skills.global)"
+  info "No global skills configured (check skills-global.yaml or config.yaml skills.global)"
 else
   created=0
   skipped=0

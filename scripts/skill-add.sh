@@ -185,12 +185,17 @@ if $global_flag && [[ -n "$installed_name" ]]; then
   echo ""
   info "Adding '$installed_name' to global skills..."
 
-  # Add to config.yaml skills.global list
-  if grep -q "^skills:" "$CONFIG" 2>/dev/null; then
+  # Add to skills-global.yaml (committed), falling back to config.yaml (legacy)
+  SKILLS_GLOBAL_FILE="$REPO_ROOT/skills-global.yaml"
+  if [[ -f "$SKILLS_GLOBAL_FILE" ]]; then
+    if ! grep -q "^ *- *${installed_name}$" "$SKILLS_GLOBAL_FILE"; then
+      # Append before the last line (keeps file tidy) or just append
+      echo "  - $installed_name" >> "$SKILLS_GLOBAL_FILE"
+    fi
+  elif grep -q "^skills:" "$CONFIG" 2>/dev/null; then
     if ! grep -q "^ *global:" "$CONFIG" 2>/dev/null; then
       sed -i '/^skills:/a\  global:\n    - '"$installed_name" "$CONFIG"
     else
-      # Check if already listed
       if ! grep -q "^ *- *${installed_name}$" "$CONFIG"; then
         sed -i "/^ *global:/a\\    - $installed_name" "$CONFIG"
       fi

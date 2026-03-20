@@ -11,9 +11,11 @@ include:
   # --- Skills (EXPLICIT per-skill allowlist) ---
   - .agents/skills/calendar-sync/
   - .agents/skills/capacity/
+  - .agents/skills/claude-api/
   - .agents/skills/confluence-review/
   - .agents/skills/cut-release/
   - .agents/skills/daily-checkin/
+  - .agents/skills/database-design/
   - .agents/skills/delegate-or-own/
   - .agents/skills/doctor/
   - .agents/skills/draft-reply/
@@ -24,6 +26,7 @@ include:
   - .agents/skills/interrupt/
   - .agents/skills/jira-review/
   - .agents/skills/log-interrupt/
+  - .agents/skills/mcp-builder/
   - .agents/skills/meeting-prep/
   - .agents/skills/morning-triage/
   - .agents/skills/add-skill/
@@ -41,6 +44,7 @@ include:
   - .agents/skills/security-scan/
   - .agents/skills/setup/
   - .agents/skills/ship/
+  - .agents/skills/skill-creator/
   - .agents/skills/slack-catch-up/
   - .agents/skills/sounding-board/
   - .agents/skills/standup/
