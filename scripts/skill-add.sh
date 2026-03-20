@@ -194,10 +194,13 @@ if $global_flag && [[ -n "$installed_name" ]]; then
     fi
   elif grep -q "^skills:" "$CONFIG" 2>/dev/null; then
     if ! grep -q "^ *global:" "$CONFIG" 2>/dev/null; then
-      sed -i '/^skills:/a\  global:\n    - '"$installed_name" "$CONFIG"
+      sed_i '/^skills:/a\
+  global:\
+    - '"$installed_name" "$CONFIG"
     else
       if ! grep -q "^ *- *${installed_name}$" "$CONFIG"; then
-        sed -i "/^ *global:/a\\    - $installed_name" "$CONFIG"
+        sed_i "/^ *global:/a\\
+    - $installed_name" "$CONFIG"
       fi
     fi
   else

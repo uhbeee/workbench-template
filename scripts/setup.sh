@@ -43,14 +43,14 @@ if [[ ! -f "$CONFIG" ]]; then
   read -rp "  Your organization: " user_org
 
   if [[ -n "$user_name" ]]; then
-    sed -i "s/name: \"Jane Smith\"/name: \"$user_name\"/" "$CONFIG"
+    sed_i "s/name: \"Jane Smith\"/name: \"$user_name\"/" "$CONFIG"
   fi
   if [[ -n "$user_org" ]]; then
-    sed -i "s/organization: \"Acme Corp\"/organization: \"$user_org\"/" "$CONFIG"
+    sed_i "s/organization: \"Acme Corp\"/organization: \"$user_org\"/" "$CONFIG"
   fi
 
   # Set workbench root to this repo's working tree
-  sed -i "s|__WORKBENCH_ROOT__|$REPO_ROOT|" "$CONFIG"
+  sed_i "s|__WORKBENCH_ROOT__|$REPO_ROOT|" "$CONFIG"
 
   pass "Config created (edit config.yaml for full customization)"
 else
@@ -59,14 +59,14 @@ fi
 
 # Ensure workbench.root is set (handles existing configs missing it)
 if ! grep -q "^workbench:" "$CONFIG"; then
-  sed -i "1i\\
+  sed_i "1i\\
 # --- Workbench Root ---\\
 workbench:\\
   root: \"$REPO_ROOT\"\\
 " "$CONFIG"
   pass "Added workbench.root to existing config"
 elif grep -q "__WORKBENCH_ROOT__" "$CONFIG"; then
-  sed -i "s|__WORKBENCH_ROOT__|$REPO_ROOT|" "$CONFIG"
+  sed_i "s|__WORKBENCH_ROOT__|$REPO_ROOT|" "$CONFIG"
   pass "Set workbench.root to $REPO_ROOT"
 else
   pass "workbench.root already configured"
@@ -80,17 +80,27 @@ mkdir -p "$REPO_ROOT/.claude"
 mkdir -p "$REPO_ROOT/.cursor"
 
 # Directory junctions (no admin needed on Windows)
-declare -A DIR_JUNCTIONS=(
-  [".claude/agents"]=".agents/agents"
-  [".claude/hooks"]=".agents/hooks"
-  [".claude/skills"]=".agents/skills"
-  [".cursor/agents"]=".agents/agents"
-  [".cursor/hooks"]=".agents/hooks"
-  [".cursor/skills"]=".agents/skills"
+# Use paired arrays for bash 3 compatibility (macOS ships bash 3.2)
+JUNCTION_DSTS=(
+  ".claude/agents"
+  ".claude/hooks"
+  ".claude/skills"
+  ".cursor/agents"
+  ".cursor/hooks"
+  ".cursor/skills"
+)
+JUNCTION_SRCS=(
+  ".agents/agents"
+  ".agents/hooks"
+  ".agents/skills"
+  ".agents/agents"
+  ".agents/hooks"
+  ".agents/skills"
 )
 
-for dst in "${!DIR_JUNCTIONS[@]}"; do
-  src="${DIR_JUNCTIONS[$dst]}"
+for i in "${!JUNCTION_DSTS[@]}"; do
+  dst="${JUNCTION_DSTS[$i]}"
+  src="${JUNCTION_SRCS[$i]}"
   full_dst="$REPO_ROOT/$dst"
   full_src="$REPO_ROOT/$src"
 
@@ -297,7 +307,10 @@ SKILLS_SRC="$REPO_ROOT/.agents/skills"
 SKILLS_DST="$HOME/.claude/skills"
 mkdir -p "$SKILLS_DST"
 
-mapfile -t GLOBAL_SKILLS < <(parse_global_skills 2>/dev/null)
+GLOBAL_SKILLS=()
+while IFS= read -r line; do
+  [[ -n "$line" ]] && GLOBAL_SKILLS+=("$line")
+done < <(parse_global_skills 2>/dev/null)
 
 if [[ ${#GLOBAL_SKILLS[@]} -eq 0 ]]; then
   info "No global skills configured (check skills-global.yaml or config.yaml skills.global)"
