@@ -17,7 +17,10 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 SKILLS_SRC="$REPO_ROOT/.agents/skills"
 SKILLS_DST="$HOME/.claude/skills"
 
-mapfile -t SKILLS < <(parse_global_skills 2>/dev/null)
+SKILLS=()
+while IFS= read -r line; do
+  [[ -n "$line" ]] && SKILLS+=("$line")
+done < <(parse_global_skills 2>/dev/null)
 
 if [[ ${#SKILLS[@]} -eq 0 ]]; then
   echo "No global skills configured (check skills-global.yaml or config.yaml skills.global)."

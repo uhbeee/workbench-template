@@ -43,7 +43,10 @@ if [[ ! -f "$ALLOWLIST" ]]; then
   exit 1
 fi
 
-mapfile -t ALLOWED_PATHS < <(
+ALLOWED_PATHS=()
+while IFS= read -r line; do
+  [[ -n "$line" ]] && ALLOWED_PATHS+=("$line")
+done < <(
   grep '^ *- ' "$ALLOWLIST" \
     | sed 's/^ *- *//; s/ *#.*//' \
     | tr -d '"' \

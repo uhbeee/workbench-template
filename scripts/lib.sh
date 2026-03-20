@@ -169,6 +169,17 @@ parse_global_skills() {
   fi
 }
 
+# ─── Cross-platform sed -i ──────────────────────────────────────────────────
+
+# macOS sed requires -i '' (empty backup ext), GNU sed uses -i alone.
+sed_i() {
+  if is_mac; then
+    sed -i '' "$@"
+  else
+    sed -i "$@"
+  fi
+}
+
 # ─── Output Helpers ────────────────────────────────────────────────────────
 
 # Colored output
