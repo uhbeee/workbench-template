@@ -1,30 +1,36 @@
 ---
 name: sync-permissions
-description: Scan worktree permissions and promote selected ones to global Claude Code settings. Use when user wants to sync, promote, or consolidate permissions across worktrees.
-argument-hint: "[--all]"
+description: Scan worktree permissions and promote selected Claude Code permissions to global settings using canonical Python tooling. Use when the user wants to sync, promote, consolidate, or inspect permissions across Workbench worktrees.
+compatibility: macOS or Windows Workbench setup with Python 3. Uses scripts/wt_sync_permissions.py, a symlink to the canonical Workbench script.
+metadata:
+  workbench.argument-hint: "[--all] [--dry-run] [--apply-all]"
 ---
 
-# Sync Worktree Permissions to Global Settings
+# Sync Worktree Permissions
 
-Scan `.claude/settings.local.json` across worktrees and promote new permissions to `~/.claude/settings.local.json`.
+Scan `.claude/settings.local.json` across worktrees and promote missing permissions to `~/.claude/settings.local.json`.
+
+Use the skill-local script symlink:
+
+```bash
+python3 scripts/wt_sync_permissions.py [--all] [--dry-run] [--apply-all]
+```
+
+On Windows, use:
+
+```powershell
+py -3 scripts\wt_sync_permissions.py [--all] [--dry-run] [--apply-all]
+```
 
 ## Process
 
-1. Determine scope:
-   - If `--all` flag is passed (or user says "all repos"): scan all repos under WORKTREE_ROOT
-   - Otherwise: auto-detect current repo from working directory
-2. Run the sync-permissions script:
-   ```bash
-   bash C:/worktrees-SeekOut/workbench/scripts/windows/wt-sync-permissions.sh [--all]
-   ```
-3. The script will:
-   - Scan all worktree settings files
-   - Present new permissions interactively (y/n/all/quit for each)
-   - Merge selected permissions into `~/.claude/settings.local.json`
-4. Report what permissions were added to global settings
+1. Use `--all` if the user wants every managed repo scanned. Otherwise run from the relevant repo/worktree.
+2. Run `--dry-run` first to show missing permissions without editing global settings.
+3. If the user approves adding all listed permissions, re-run with `--apply-all`.
+4. Report `SCANNED_FILES`, `MISSING_PERMISSIONS`, each `PERMISSION=...`, and `ADDED`.
 
-## Notes
+## Guardrails
 
-- Global permissions in `~/.claude/settings.local.json` apply to ALL projects
-- This is useful after accumulating permissions in feature worktrees via "yes and don't ask again"
-- The script uses `node` for reliable JSON reading/writing
+- Do not promote permissions silently. Use `--apply-all` only after explicit user approval.
+- This changes global Claude Code settings, so summarize exactly what was added.
+- If the user only wants to inspect permissions, stop after `--dry-run`.

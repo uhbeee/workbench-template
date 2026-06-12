@@ -1,0 +1,29 @@
+{
+  "skill_name": "hotfix",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Dry run cherry-picking PR 5628 into release/2026.04.28 in recruit-api.",
+      "expected_output": "Runs scripts/wt_hotfix_pr.py 5628 --repo recruit-api --release release/2026.04.28 --dry-run, validates the PR is merged, reports strategy, hotfix branch, and worktree path.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Create a plain hotfix branch named oauth-token-fix.",
+      "expected_output": "Uses the hotfix skill directly, runs scripts/wt_hotfix.py oauth-token-fix with an inferred or explicit repo/base branch, reports WORKTREE_PATH and branch status, and keeps develop/main untouched.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Cherry-pick PR 5628 to both PPE and prod for recruit-api.",
+      "expected_output": "Identifies or asks for the exact PPE and prod release branches, runs scripts/wt_hotfix_pr.py separately for each target release branch, creates separate _hotfix worktrees and hotfix PRs, reports PR_URL, WORKTREE_PATH, HOTFIX_BRANCH, and CLEANUP_COMMAND for each, and does not touch develop/main.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Create a hotfix to both ppe and prod for recruit-api named oauth-token-fix.",
+      "expected_output": "Uses the hotfix skill directly, identifies or asks for the exact PPE and prod release/base branches, creates separate target-specific _hotfix worktrees with scripts/wt_hotfix.py for each branch, reports both WORKTREE_PATH values and base branches, and keeps develop/main untouched.",
+      "files": []
+    }
+  ]
+}

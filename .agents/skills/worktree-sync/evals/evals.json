@@ -1,0 +1,17 @@
+{
+  "skill_name": "worktree-sync",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Rebase the recruit-api oauth-token-fix hotfix worktree onto develop.",
+      "expected_output": "Runs scripts/wt_sync.py oauth-token-fix develop --repo recruit-api --rebase after checking dirty state, and reports WORKTREE_PATH, BRANCH, TARGET, STRATEGY, and completion or conflict instructions.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Merge main into my example-service branch, but do not change anything yet.",
+      "expected_output": "Runs scripts/wt_sync.py <branch> main --repo example-service --merge --dry-run and reports the planned operation without mutating the worktree.",
+      "files": []
+    }
+  ]
+}

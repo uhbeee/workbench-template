@@ -1,0 +1,17 @@
+{
+  "skill_name": "cut-release",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Preview the next recruit-api release branch.",
+      "expected_output": "Runs scripts/wt_release.py --repo recruit-api --dry-run, reports BRANCH, SOURCE, SOURCE_SHA, FORMAT, WORKTREE_PATH under _release, and makes no changes.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Cut a backend pubapi release from main.",
+      "expected_output": "Runs scripts/wt_release.py pubapi --repo backend --source main, asks or confirms before omitting --dry-run, creates the release branch and _release worktree, pushes with upstream, and reports BRANCH, SOURCE, SOURCE_SHA, and WORKTREE_PATH.",
+      "files": []
+    }
+  ]
+}

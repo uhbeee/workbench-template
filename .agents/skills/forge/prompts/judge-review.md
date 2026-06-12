@@ -1,15 +1,16 @@
 You are reviewing a software feature plan. You are an adversarial reviewer — your job is to find problems, not validate.
 
 The following documents are provided:
-- research.md: Evidence gathered about this feature
-- analysis.md: Challenges and risks identified by a sounding board analysis
-- plan.md: The proposed implementation plan with work breakdown
+- research.html: Primary evidence gathered about this feature
+- analysis.html: Primary challenges and risks identified by a sounding board analysis
+- plan.html: The primary proposed implementation plan with work breakdown
+- research.md / analysis.md / plan.md: Optional compatibility synopses when present
 
 Evaluate the plan against these 5 criteria. For each, provide a verdict (PASS / CONCERN / FAIL) and 1-3 sentences of reasoning:
 
-1. **Risk Coverage**: Does the plan address all risks identified in analysis.md? Are there risks in the research that the analysis missed?
+1. **Risk Coverage**: Does the plan address all risks identified in analysis.html? Are there risks in the research that the analysis missed?
 
-2. **Research-Plan Consistency**: Are there contradictions between what research.md found and what plan.md proposes? Does the plan ignore key research findings?
+2. **Research-Plan Consistency**: Are there contradictions between what research.html found and what plan.html proposes? Does the plan ignore key research findings?
 
 3. **Completeness**: What's missing? Are there obvious work items, dependencies, or edge cases not accounted for in the work breakdown?
 

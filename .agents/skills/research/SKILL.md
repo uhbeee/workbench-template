@@ -1,10 +1,11 @@
 ---
 name: research
 description: Multi-source research methodology with confidence ratings. Searches Confluence, Jira, Slack, and the web. Produces structured findings with source quality ratings. Use when investigating a technology choice, gathering context on a feature, or building an evidence base.
-argument-hint: <topic-or-plan-name> [description]
+metadata:
+  workbench.argument-hint: "<topic-or-plan-name> [description]"
 ---
 
-> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
+> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.codex/workbench-root` or `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
 
 # Research Methodology
 
@@ -40,6 +41,11 @@ Before anything else:
 1. **Read `config.yaml`** from the repository root for Confluence spaces, Jira projects, and Slack channels.
 2. **Check `context/notes/research/`** for prior research that relates to the current question. Prior research compounds — always build on what exists.
 3. **Check `context/plans/active/`** — if the first argument matches a plan directory name, this research is part of a feature plan pipeline.
+4. **Invoke the `repo-context` skill** when the question involves internal systems, repos, services, product flows, validation, or debugging. Use its bundled helper for deterministic output:
+   - `python3 <workbench-root>/.agents/skills/repo-context/scripts/repo_context.py explain --current --include-adjacent`
+   - or `python3 <workbench-root>/.agents/skills/repo-context/scripts/repo_context.py explain --repo <repo> --include-adjacent`
+   - or `python3 <workbench-root>/.agents/skills/repo-context/scripts/repo_context.py explain --service <service> --include-adjacent`
+   Use repo-context to bound the search, identify adjacent repos/services, and capture repo-specific rule entrypoints. If saving `research.html`, include repo-context as a source anchor and link any generated scoped packet.
 
 ### Step 2: Gather Context from the User
 
@@ -87,6 +93,8 @@ Example decomposition for "Should we use gRPC for inter-service communication?":
 For questions that involve internal systems, architecture, or implementation — explore the actual code. **The codebase is a primary source.** Docs can be stale; code is ground truth.
 
 **Use the pointers from Step 2.** Start with any files/directories the user pointed to, then explore outward:
+- Start with repo-context's current repo, matched services, one-hop adjacent services, `context_files`, `repo_rule_entrypoints`, `instruction_dirs`, and service `inspect_first`.
+- Read repo-specific rule entrypoints before exploring or interpreting a target repo.
 - Use `Glob` to find relevant files by pattern (e.g., `**/*RateLimiter*`, `**/services/**/*.cs`)
 - Use `Grep` to search for specific patterns, interfaces, usage of the technology under discussion
 - Use `Read` to examine key files — current implementations, abstractions, configuration, tests
@@ -176,13 +184,16 @@ Execute up to 3 follow-up searches to fill the most critical gaps. Then stop —
 
 ### Step 11: Produce the Report
 
-Use the output format below. The executive summary answers the question upfront — everything else is for drilling down.
+If the report is saved to disk, shared, or handed to another agent/engineer, read `context/standards/html-plan-standard.md` (the Artifact Format Standard). Research reports default to **Markdown-first** — they're text-heavy and agents read them just as often as humans. The executive summary answers the question upfront; everything else is for drilling down.
+
+Generate an HTML companion only when the research has substantial visual content the MD can't carry (architecture comparison diagrams, multi-vendor matrices with semantic colors, side-by-side mockups). Mostly-prose research reports stay MD-only.
 
 ### Step 12: Persist and Offer Next Steps
 
 1. **Save the report**:
-   - If `context/plans/active/$0/` exists (where `$0` is the first argument), save to `context/plans/active/$0/research.md` and update `state.md`
-   - Otherwise, save to `context/notes/research/YYYY-MM-DD-slug.md` where `slug` is a short kebab-case description (e.g., `2026-02-08-grpc-vs-rest.md`)
+   - If `context/plans/active/$0/` exists (where `$0` is the first argument), save the primary report to `context/plans/active/$0/research.md` and update `state.md`.
+   - Otherwise, save the primary report to `context/notes/research/YYYY-MM-DD-slug.md` where `slug` is a short kebab-case description (e.g., `2026-02-08-grpc-vs-rest.md`).
+   - Generate `research.html` (or `YYYY-MM-DD-slug.html`) as a visual companion only when the visual-content criteria above are met.
 2. **Offer next steps** based on what makes sense:
    - Run `/sounding-board` to stress-test conclusions
    - Do a **deep dive** if this was a quick/standard research (escalate depth)
@@ -191,108 +202,21 @@ Use the output format below. The executive summary answers the question upfront 
    - Draft a **Confluence doc** summarizing findings for the team
    - Run the **estimate** agent if the research supports a decision that needs sizing
 
-## Output Format
+## HTML Report Structure
 
-```markdown
-# Research: [Topic]
+Create a self-contained HTML page with these sections:
 
-**Date**: YYYY-MM-DD
-**Depth**: quick lookup / standard research / deep dive
-**Question**: [The original research question]
+- top summary band: topic, date, depth, question, bottom line, confidence distribution, and known gap count,
+- executive summary: 3-6 key findings with confidence labels,
+- sub-question findings: consensus answer, confidence, supporting evidence, and conflicting evidence,
+- counter-evidence: risks, downsides, failure cases, or dissenting sources,
+- internal context: codebase findings, Confluence/Jira/Slack context, prior research, and internal knowledge gaps,
+- synthesis: how the evidence fits together,
+- implications: what changes if the direction is pursued or not pursued,
+- sources table: source name/link, type, quality, key takeaway,
+- research quality: depth, source counts, confidence distribution, known gaps, and staleness risk.
 
-## Executive Summary
-
-- [Key finding 1 — the most important thing] (confidence: high/medium/low)
-- [Key finding 2] (confidence: high/medium/low)
-- [Key finding 3] (confidence: high/medium/low)
-- [Key finding 4 — if applicable] (confidence: high/medium/low)
-- **Bottom line**: [One sentence answering the question directly]
-
-## Sub-question Findings
-
-### [Sub-question 1]
-
-**Finding**: [Consensus answer]
-**Confidence**: high / medium / low
-
-[Supporting evidence with inline citations — e.g., "According to [Source Name], ..."]
-
-[Conflicting evidence, if any, with proportional framing]
-
-### [Sub-question 2]
-(Same structure)
-
-### [Sub-question N: Counter-evidence]
-
-**Finding**: [What are the risks/downsides/failure cases]
-**Confidence**: high / medium / low
-
-[Evidence of failures, pain points, risks]
-
-## Internal Context
-
-**What we already know/have**:
-- [Codebase findings — current implementations, patterns, dependencies explored]
-- [Relevant Confluence docs found, with links]
-- [Related Jira tickets, with keys]
-- [Slack discussions, with channel/thread references]
-- [Prior research from context/notes/research/, with file references]
-
-**Gaps in internal knowledge**:
-- [What we don't have docs on but probably should]
-- [Decisions that were made informally and never recorded]
-
-## Synthesis
-
-[2-3 paragraphs connecting the sub-question findings into a coherent picture. This is where the pieces come together — not just a list of facts, but what they mean together.]
-
-## Implications
-
-**If pursuing this direction**:
-- [What changes, what's needed, what to watch for]
-
-**If not pursuing**:
-- [What the alternatives are, what the status quo costs]
-
-**Open questions**:
-- [Things this research couldn't answer — need more investigation, a spike, or a conversation]
-
-## Sources
-
-| # | Source | Type | Quality | Key Takeaway |
-|---|--------|------|---------|-------------|
-| 1 | [Source name + link] | internal/external | high/medium/low | [One-line summary] |
-| 2 | ... | ... | ... | ... |
-
-## Research Quality
-
-- **Depth**: quick lookup / standard research / deep dive
-- **Internal sources found**: X
-- **External sources consulted**: Y
-- **Confidence distribution**: X high, Y medium, Z low
-- **Known gaps**: [What this research didn't cover]
-- **Staleness risk**: [How quickly these findings might become outdated]
-```
-
-**For quick lookups**, use a simplified format — skip the sub-question structure and go straight to the answer with sources:
-
-```markdown
-# Research: [Topic]
-
-**Date**: YYYY-MM-DD
-**Depth**: quick lookup
-**Question**: [The question]
-
-## Answer
-
-[Direct answer with supporting evidence and citations]
-
-## Sources
-
-| # | Source | Type | Quality | Key Takeaway |
-|---|--------|------|---------|-------------|
-| 1 | ... | ... | ... | ... |
-```
+For quick lookups, use the same HTML shell but simplify it to: answer, confidence, source table, and known gaps.
 
 ## Key Principles
 

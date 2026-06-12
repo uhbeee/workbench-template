@@ -22,7 +22,7 @@ fi
 CONTEXT_FILE=$(mktemp)
 trap 'rm -f "$CONTEXT_FILE"' EXIT
 
-for artifact in research.md analysis.md plan.md; do
+for artifact in research.html analysis.html plan.html research.md analysis.md plan.md; do
     artifact_path="$PLAN_DIR/$artifact"
     if [ -f "$artifact_path" ]; then
         echo "--- $artifact ---" >> "$CONTEXT_FILE"

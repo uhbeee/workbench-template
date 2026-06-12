@@ -1,143 +1,93 @@
 ---
 name: ship
-description: Ship implemented code — full review, address findings, create PR, link to Jira, update plan state
-argument-hint: [<plan-name>] [--draft] [--skip-review]
+description: Land implemented code — open the PR, monitor GitHub checks, merge, then clean up the worktree and local branch. Does NOT review (review-gauntlet is the authoritative review — run it first). Links Jira and updates plan state.
+metadata:
+  workbench.argument-hint: "[<plan-name>] [--draft] [--no-merge] [--no-cleanup]"
 ---
 
-> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
+> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.codex/workbench-root` or `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
 
-# /ship — Ship Implemented Code
+# /ship — Land Implemented Code (open → monitor → merge → tidy)
 
-**Mode: Release Engineer** — You are a meticulous release engineer. You verify everything before it ships. You run the full review. You write clear PR descriptions. You link artifacts. Nothing goes out without your checks.
+**Mode: Release Engineer** — You land work that has already passed review. You open a clean PR, watch CI, merge when green, and leave no mess behind. **You do not review** — that is `review-gauntlet`'s job, and it must have run first (it is the single source of review truth; see `../plan-to-workflow/references/orchestration-model.md`).
+
+This skill is the final stage of the canonical gate chain: `worktree → implement → E2E → review-gauntlet → **ship**`.
 
 ## Interaction Model
 
-**Always use `AskUserQuestion`** when you need user input — which findings to address, whether to defer items, PR title/body adjustments, Jira transition choices. Never guess at the user's intent. Present clear options with context.
+**Use `AskUserQuestion`** for irreversible/outward steps when run interactively — confirming the merge, Jira transitions, PR title/body. When invoked as the autonomous Workflow ship stage, proceed without nagging once checks are green and the PR is mergeable; still never merge a PR with red/required-but-pending checks.
 
 ## Usage
 
 ```
-/ship                     # Ship current branch (auto-detect plan if available)
-/ship <plan-name>         # Ship a specific forge plan's implementation
-/ship --draft             # Create as draft PR
-/ship --skip-review       # Skip the /review-code pass (use when already reviewed)
+/ship                  # Land current branch (auto-detect plan if available)
+/ship <plan-name>      # Land a specific plan's implementation
+/ship --draft          # Open as draft PR, do not merge (implies --no-merge --no-cleanup)
+/ship --no-merge       # Open + monitor only; stop before merging
+/ship --no-cleanup     # Merge but keep the worktree + local branch
 ```
 
 ## Process
 
-### Step 0: Determine What to Ship
+### Step 0: Determine what to ship
+1. Read `~/.codex/workbench-root` / `~/.claude/workbench-root`; read `config.yaml` for Jira keys + GitHub org.
+2. Plan name given → read `<workbench>/context/plans/active/<plan-name>/progress.md` (or the plan dir's `summary.md`/`pipeline.md`) for context. No plan → use the branch diff.
+3. Resolve base/parent branch: from plan state if available; **for a stacked PR, the base is its PARENT branch, not the repo default.** Otherwise `develop` (or `main`).
 
-Read `~/.claude/workbench-root` to get the workbench path. Read `config.yaml` for Jira project keys and GitHub org.
+### Step 1: Pre-flight (NOT a review)
+1. **Confirm review happened.** Review is out of scope here. If there's no evidence `review-gauntlet` ran for this diff (no gauntlet result in the plan/pipeline, user didn't say so), STOP and say: "Run `/review-gauntlet` first — ship does not review." Do not substitute a review.
+2. **Build/tests sanity** — a quick green check (the gauntlet already ran the real-data suites; this is just a guard against a dirty tree). If red → report, ask how to proceed.
+3. **Working tree**: `git status`. If this PR's files are uncommitted, commit ONLY this PR's files (exclude `.claude/*`, `.coverage`, unrelated dirty paths). Never leave the work uncommitted.
+4. **Branch freshness**: `git fetch`; if behind base, offer rebase/merge before opening.
 
-1. **If plan name given** → read `<workbench>/context/plans/active/<plan-name>/progress.md` for context
-2. **If no plan name** → check current branch:
-   - Look for progress.md in the workbench plans directory that references this branch
-   - If found → use that plan's context
-   - If not → ship based on current branch diff (no plan context)
-3. Determine base branch:
-   - From progress.md Branch State if available
-   - Otherwise: `main` (or `develop` if the repo uses it)
+### Step 2: Open the PR
+1. **Title** — from plan name / Jira ticket / branch; confirm with `AskUserQuestion` when interactive.
+2. **Body**:
+   ```markdown
+   ## Summary
+   <from plan summary, 2-3 sentences>
+   ## Changes
+   <from progress/summary, grouped by area>
+   ## Testing
+   - [x] review-gauntlet GREEN (5-lens + invariant audit + CRAP gate)
+   - [x] real-data E2E: <what ran live — testcontainers / live MCP+Runtime>
+   ## Linked
+   - Plan: <name> · Ticket: <Jira ID>
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+   ```
+3. `gh pr create --base <parent-or-base> --head <branch> --title … --body …`. Add `--draft` if flagged. On failure → report + suggest manual.
 
-### Step 1: Pre-flight Checks
+### Step 3: Monitor GitHub
+1. Poll `gh pr checks <pr>` (and `gh pr view <pr> --json mergeStateStatus,statusCheckRollup,reviewDecision`) until checks conclude.
+2. Report check results. If any required check **fails** → STOP, surface the failing check, do not merge. If checks are merely pending → wait/poll (bounded), then re-report.
 
-Run all checks. Report any failures and ask how to proceed.
+### Step 4: Merge (skip if `--draft`/`--no-merge`)
+1. Merge only when: required checks GREEN and the PR is mergeable (no conflicts, required approvals satisfied per branch protection).
+2. Interactive → `AskUserQuestion` confirm merge + method (squash/merge/rebase per repo convention). Autonomous → merge with the repo's default method once green.
+3. `gh pr merge <pr> --squash` (or repo convention) `--delete-branch` if remote-branch deletion is wanted.
 
-1. **Tests**: Run the project's test command (`npm test`, `go test ./...`, `pytest`, `cargo test`, etc.)
-   - If no obvious test command → use `AskUserQuestion`: "What's the test command for this project?"
-   - Must pass. If failing → report which tests, ask: "Fix now or ship anyway?"
+### Step 5: Post-merge cleanup (skip if `--no-cleanup` or not merged)
+1. **Remove the worktree** — use the `worktree-remove` skill (guarded dry-run first) for this PR's feature worktree.
+2. **Delete the local branch** — `git branch -d <branch>` (use `-D` only if you confirm it's merged). Prune the remote tracking ref if the remote branch was deleted on merge.
+3. For a **stacked** PR, do NOT delete a branch that a child PR still targets — cleanup waits until dependents have re-pointed/merged.
 
-2. **Build**: Run build if applicable (`npm run build`, `go build ./...`, etc.)
-   - Must pass. If failing → report error.
+### Step 6: Link artifacts
+1. **Jira** (if found): comment the PR link; `AskUserQuestion` to confirm any transition (e.g. → In Review/Done).
+2. **Plan**: update `progress.md`/`pipeline.md` + state to reflect merged + cleaned.
 
-3. **Uncommitted changes**: `git status`
-   - If dirty → use `AskUserQuestion`: "Uncommitted changes found. Commit them / Stash them / Abort"
-
-4. **Branch up to date**: `git fetch` then check if behind base
-   - If behind → suggest: "Branch is N commits behind <base>. Rebase or merge before shipping?"
-
-5. If all pass → "Pre-flight checks passed. Proceeding to review."
-
-### Step 2: Code Review
-
-Skip this step if `--skip-review` flag is set.
-
-1. Run `/review-code` (full adaptive pass — invokes structural-review, security-scan, qa-check, test-suggest as appropriate for the diff)
-
-2. Present findings grouped by severity.
-
-3. **Critical findings**: Use `AskUserQuestion`:
-   - "Found N critical issues that should be fixed before shipping:"
-   - List each finding
-   - Options: Fix all now / Review one by one / Ship anyway (not recommended)
-
-4. **High findings**: Use `AskUserQuestion`:
-   - "Found N high-priority items. Recommended to address:"
-   - Options: Fix all / Fix selected / Defer to follow-up
-
-5. **Medium/Low/Suggestions**: Note these — they go into the PR description as "Known items."
-
-6. If fixes were made → re-run the affected checks to verify fixes.
-
-### Step 3: Create PR
-
-1. **Build PR title**:
-   - From forge plan name if available → clean up as a title (e.g., "implementation-harness" → "Add implementation harness")
-   - From Jira ticket title if linked
-   - From branch name as fallback
-   - Use `AskUserQuestion` to confirm: "PR title: '<title>'. Looks good?"
-
-2. **Build PR body**:
-
-```markdown
-## Summary
-<from plan description or progress.md, 2-3 sentences>
-
-## Changes
-<from progress.md completed steps, grouped by area>
-
-## Testing
-- [x] Unit tests passing
-- [x] Build passes
-- [x] Code review: N critical (fixed), N high (fixed), N suggestions (noted)
-
-## Known Items
-<medium/low findings deferred from review, if any>
-
-## Linked
-- Plan: <forge plan name, if applicable>
-- Ticket: <Jira ID, if found>
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-```
-
-3. **Create PR**:
-   - `gh pr create --title "<title>" --body "<body>"`
-   - If `--draft` flag → add `--draft`
-   - If creation fails → report error, suggest manual creation
-
-### Step 4: Link Artifacts
-
-1. **Jira ticket** (if found from plan, branch name, or PR title):
-   - Search for ticket ID matching patterns from `config.yaml: jira.projects[].ticket_pattern`
-   - If found → add comment to Jira ticket with PR link (use Atlassian MCP tool)
-   - If applicable → transition ticket (e.g., to "In Review") — use `AskUserQuestion` to confirm transition
-
-2. **Forge plan** (if applicable):
-   - Update progress.md phase to `done`
-   - Update forge state.md phase to `done`
-
-### Step 5: Summary
-
-Present the final summary:
-
+### Step 7: Summary
 ```markdown
 ## /ship Complete
-
-**PR**: <url>
-**Branch**: <branch> → <base>
-**Review**: N critical (fixed), N high (fixed), N suggestions (noted)
-**Jira**: <ticket-id> updated (or "no ticket linked")
-**Plan**: <plan-name> marked done (or "no plan")
-
-**Suggested reviewers**: <from git blame on changed files>
+**PR**: <url> — <merged | open | draft>
+**Branch**: <branch> → <base/parent>
+**Checks**: <green/failed/pending summary>
+**Review**: review-gauntlet GREEN (ran in the prior stage)
+**Cleanup**: worktree removed · local branch deleted (or "kept: --no-cleanup")
+**Jira**: <ticket> updated (or "none") · **Plan**: <name> marked shipped (or "none")
 ```
+
+## Non-negotiables
+- **No review here.** If the gauntlet didn't run, stop and say so. Single source of review truth = `review-gauntlet`.
+- **Commit only this PR's files**; never leave work uncommitted in the worktree.
+- **Never merge on red/pending-required checks.**
+- **Tidy after landing** — worktree + local branch — unless `--no-cleanup` or a child PR still depends on the branch.

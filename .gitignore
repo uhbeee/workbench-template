@@ -12,6 +12,12 @@ Thumbs.db
 
 # Personal config (gitignored — copy from config.example.yaml)
 config.yaml
+.env
+
+# cmux browser auth-state files (cookies + localStorage from authenticated sessions)
+.auth-state-*.json
+.env.*
+!.env.example
 
 # Calibration data (personal estimation history)
 context/calibration.md
@@ -21,6 +27,7 @@ context/notes/scratch-*
 
 # Local overrides
 *.local.yaml
+context/repo-context/local.overrides.yaml
 secrets/
 
 # Junctions/symlinks created by setup.sh (NOT committed to git)
@@ -44,3 +51,7 @@ scripts/windows/wt-config.sh
 
 # Machine-specific .cmd config
 scripts/windows/bin/wt-config.cmd
+
+# context/repo-context and config/appinsights may be tracked symlinks into
+# a private knowledge-graph repository. Workbench reads it through these links.
+# A fresh workbench clone needs that private repo at the linked path to resolve.

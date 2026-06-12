@@ -101,6 +101,82 @@ remove_link() {
   fi
 }
 
+# Return true when two directory paths resolve to the same physical location.
+same_physical_dir() {
+  local left="$1" right="$2"
+  [[ -d "$left" && -d "$right" ]] || return 1
+
+  local left_real right_real
+  left_real="$(cd "$left" && pwd -P)"
+  right_real="$(cd "$right" && pwd -P)"
+  [[ "$left_real" == "$right_real" ]]
+}
+
+# Worktree skills share one canonical scripts implementation. Each skill keeps a
+# skill-local scripts/ entry for Agent Skills compatibility.
+worktree_skill_script_link_skills() {
+  printf '%s\n' \
+    cut-release \
+    hotfix \
+    sync-permissions \
+    worktree-feature-create \
+    worktrees \
+    worktree-review-create \
+    worktree-sync \
+    worktree-remove \
+    worktree-migrate
+}
+
+ensure_worktree_skill_script_links() {
+  local target_abs="$REPO_ROOT/scripts/worktrees"
+  local target_rel="../../../scripts/worktrees"
+  local failures=0
+
+  if [[ ! -d "$target_abs" ]]; then
+    fail "scripts/worktrees missing; cannot create worktree skill script links"
+    return 1
+  fi
+
+  while IFS= read -r skill; do
+    [[ -n "$skill" ]] || continue
+
+    local skill_dir="$REPO_ROOT/.agents/skills/$skill"
+    local link_path="$skill_dir/scripts"
+
+    if [[ ! -d "$skill_dir" ]]; then
+      warn "$skill/scripts skipped — skill directory missing"
+      failures=$((failures + 1))
+      continue
+    fi
+
+    if is_link "$link_path"; then
+      if same_physical_dir "$link_path" "$target_abs"; then
+        pass "$skill/scripts → scripts/worktrees"
+        continue
+      fi
+
+      remove_link "$link_path"
+    elif [[ -e "$link_path" ]]; then
+      rm -rf "$link_path"
+    fi
+
+    if is_windows; then
+      create_dir_link "$target_abs" "$link_path" >/dev/null
+    else
+      ln -s "$target_rel" "$link_path"
+    fi
+
+    if same_physical_dir "$link_path" "$target_abs"; then
+      pass "$skill/scripts → scripts/worktrees"
+    else
+      fail "$skill/scripts could not be linked to scripts/worktrees"
+      failures=$((failures + 1))
+    fi
+  done < <(worktree_skill_script_link_skills)
+
+  [[ $failures -eq 0 ]]
+}
+
 # ─── Config Helpers ────────────────────────────────────────────────────────
 
 # Check if config.yaml exists
@@ -166,17 +242,6 @@ parse_global_skills() {
       | tr -d "'"
   else
     parse_yaml_list "skills.global"
-  fi
-}
-
-# ─── Cross-platform sed -i ──────────────────────────────────────────────────
-
-# macOS sed requires -i '' (empty backup ext), GNU sed uses -i alone.
-sed_i() {
-  if is_mac; then
-    sed -i '' "$@"
-  else
-    sed -i "$@"
   fi
 }
 

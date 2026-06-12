@@ -1,46 +1,11 @@
-#!/bin/bash
-# wt-hotfix-done.sh - Remove a hotfix worktree after merging
-# Usage: wt-hotfix-done.sh <branch-name> [--workdir <path>]
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKBENCH_ROOT="${WORKBENCH_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
-set -e
-
-branch_name=""
-workdir=""
-
-# Parse arguments
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --workdir)
-            workdir="$2"
-            shift 2
-            ;;
-        -*)
-            echo "Unknown option: $1"
-            exit 1
-            ;;
-        *)
-            branch_name="$1"
-            shift
-            ;;
-    esac
-done
-
-if [ -z "$branch_name" ]; then
-    echo "Usage: wt-hotfix-done <branch-name>"
-    exit 1
+if command -v python3 >/dev/null 2>&1; then
+  exec python3 "$WORKBENCH_ROOT/scripts/worktrees/wt_hotfix_done.py" "$@"
+elif command -v python >/dev/null 2>&1; then
+  exec python "$WORKBENCH_ROOT/scripts/worktrees/wt_hotfix_done.py" "$@"
 fi
-
-# Change to workdir if specified (used by .cmd wrapper)
-if [ -n "$workdir" ]; then
-    cd "$workdir"
-fi
-
-# Get repo root
-repo_root=$(git rev-parse --git-common-dir 2>/dev/null || git rev-parse --git-dir)
-cd "$repo_root"
-
-echo "Removing hotfix worktree..."
-git worktree remove "_hotfix/$branch_name" --force
-git worktree prune
-
-echo "Hotfix worktree removed"
+exec py -3 "$WORKBENCH_ROOT/scripts/worktrees/wt_hotfix_done.py" "$@"

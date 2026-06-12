@@ -48,6 +48,16 @@ The `.claude/` directory contains Claude Code configuration for this workspace:
 - **`.claude/hooks/`** — Junction to `.agents/hooks/`. Hook scripts for session lifecycle events.
 - **`.claude/settings.local.json`** — MCP tool permissions. Pre-approves Atlassian, Slack, Figma, git, and web search so agents can run without repeated permission prompts.
 
+## Worktree Isolation — never plan or generate code on develop/main
+
+Any Workbench skill that creates a plan, generates or edits code, or otherwise touches files in a managed repo MUST do that work in an isolated feature worktree — **never directly on `develop`/`main`** (or `master`/`staging`/`production`/`release/*`). You can run everything *from* `develop`; the worktree is created, worked in, and removed for you.
+
+- **Guard at the start of the work.** If the current checkout is on a protected branch, create a feature worktree first (via the `worktree-feature-create` skill) and do every edit there.
+- **Fallback when the tooling/skill is absent.** If `worktree-feature-create` or the canonical Workbench worktree tooling isn't available (e.g. a machine without Workbench), still create the worktree with plain `git worktree add -b <branch> <path> <base>` (see worktree-feature-create's "Non-Workbench Fallback"). Do NOT fall through to editing on the protected branch.
+- **Cleanup policy.** After the work lands, remove the worktree + local branch (the `ship` skill does this on merge; `worktree-remove` otherwise). **Delete after merge/success; keep the worktree on failure** so it can be debugged.
+- **Exemptions.** Read-only / advisory skills (triage, status, research notes, calendar, etc.) are exempt — this rule targets plan-generating and code-touching work.
+- **Scope.** This is a Workbench-skill rule. Repo-local skills (e.g. spot-v2's own) follow their own repo's conventions.
+
 ## What This Is
 
 This is the operational hub for a senior/principal software engineer. It is NOT a code repository. It is where you come to think, plan, gather context, and stay accountable.
@@ -252,6 +262,8 @@ Git worktree scripts live in `scripts/windows/` and `scripts/mac/`. The repo reg
 
 Shell functions (`wt-feature`, `wt-review`, `wt-status`, etc.) are loaded via `scripts/windows/wt-profile.sh` (sourced in `~/.bashrc`) or `scripts/mac/wt-profile.zsh` (sourced in `~/.zshrc`).
 
+All repo-changing work should happen in managed worktrees. Do not implement, hotfix, release-edit, or review from `main`, `develop`, `master`, or a bare repo root unless the user explicitly overrides this rule for a one-off command.
+
 Key commands:
 - `wt-status` — Show all worktrees across managed repos
 - `wt-feature <branch>` — Create a feature worktree
@@ -261,18 +273,39 @@ Key commands:
 
 Windows `.cmd` wrappers in `scripts/windows/bin/` allow running from any terminal (added to PATH by setup).
 
+Agent routing rules:
+- For implementation requests such as "create a worktree for <repo> and do the following", use the `worktree-feature-create` skill first, enter the printed `WORKTREE_PATH`, and implement there.
+- If work was accidentally done in `develop`, `main`, or another base checkout, use `worktree-feature-create` to create a proper feature worktree, migrate the dirty diff into it, verify the diff, and only clean the base checkout after explicit approval.
+- For cleanup requests such as "remove all worktrees merged to develop", use `worktree-remove` with a dry-run merged inventory first. Remove only clean managed worktrees whose branch is already merged; skip dirty/protected worktrees and report them.
+- For PR review requests such as "let's review this PR", use `worktree-review-create`; create the review checkout and produce a `reviewer-packet.html` using the HTML review packet standard.
+- For release requests, use `cut-release`; release branches should get a managed `_release/` worktree for follow-up work instead of editing `develop` or `main`.
+- For hotfixes, use `hotfix` for both plain hotfix branches and cherry-picking an already merged PR to a release branch. PPE/prod hotfixes should use separate target-specific worktrees and keep `develop` and `main` clean.
+
 ## Global Skills
 
-Skills that should be available in every Claude Code project are listed in `config.yaml: skills.global`. The setup script (`scripts/setup-global-skills.sh`) creates junctions from `~/.claude/skills/<name>` to `.agents/skills/<name>` (the physical path in this repo).
+Skills that should be available in every Claude Code and Codex project are listed in `skills-global.yaml` (falling back to `config.yaml: skills.global` for legacy configs). The setup script (`scripts/setup-global-skills.sh`) creates junctions from `~/.claude/skills/<name>` and `~/.codex/skills/<name>` to `.agents/skills/<name>` (the physical path in this repo).
 
 This means a skill authored once in `.agents/skills/my-skill/SKILL.md` becomes available in every project without duplication.
 
 ## Implementation & Shipping Workflow
 
 The full engineering workflow from plan to PR:
-1. `/forge <name>` — Plan the feature (produces handoff.md + progress.md)
+1. `/forge <name>` — Plan the feature (produces plan.html + handoff.md + progress.md)
 2. `/implement <name>` — Execute the plan step-by-step (TDD, progress tracking, boundary checkpoints)
 3. `/ship` — Review code, create PR, link Jira, mark plan done
+
+## HTML Planning Standard
+
+Saved, shared, or reviewable human-readable artifacts should be HTML-first. This includes feature plans, implementation plans, PRDs, research reports, sounding-board analyses, ticket breakdowns, validation plans, context packets, reviewer packets, PR breakdowns, status reports, demo packages, and strategic planning artifacts. Before creating or updating one of these artifacts, read `context/standards/html-plan-standard.md` and follow it.
+
+The previous `write-html` skill is intentionally inactive and kept only for experimentation at `.agents/inactive-skills/write-html/`. Do not rely on it as an active Workbench skill unless it is restored to `.agents/skills/write-html/`.
+
+- Use `plan.html`, `prd.html`, `research.html`, `analysis.html`, `validation-plan.html`, `context-packet.html`, `reviewer-packet.html`, `pr-breakdown.html`, or another purpose-named `.html` file as the primary human-readable artifact.
+- Keep Markdown only for compatibility with existing automations, prompts, and paste targets (`state.md`, `progress.md`, `activity.md`, `handoff.md`, `daily.md`, `weekly.md`, `goals.md`, `jira-draft.md`, `pr-draft.md`, and short `.md` summaries that link to HTML).
+- If both HTML and Markdown exist, the HTML file is the source of truth for human review; the Markdown file is an index, prompt, tracker, or compatibility shim.
+- PR breakdowns should follow the implementation-plan pattern: milestone timeline, data/service flow, risky code or contract snippets, risk table, open questions, validation, and reviewer focus.
+- The HTML must be self-contained, directly openable in a browser, responsive, and readable by an engineer who does not have the chat history.
+- Validate HTML artifacts with `.agents/inactive-skills/write-html/scripts/validate_html.py` when available.
 
 For code review of others' PRs:
 1. Use `pr-context` agent to gather Jira ticket + design doc + Slack discussion

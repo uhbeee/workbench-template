@@ -35,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .agents/hooks/suggest-review.py"
+            "command": "bash -c 'WB_ROOT=$(cat ~/.claude/workbench-root 2>/dev/null || echo .) && python3 \"$WB_ROOT/.agents/hooks/suggest-review.py\"'"
           }
         ]
       }

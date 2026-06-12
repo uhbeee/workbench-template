@@ -1,71 +1,48 @@
-# [Feature Name] Strategic Plan
+# HTML Plan Template Notes
 
-## Overview
+`plan-create` creates HTML-first plans.
 
-2-3 sentences describing what this feature does and why it's needed.
+Primary artifact:
+- `context/plans/active/<plan-name>/plan.html`
 
-**Original request**: [The initial feature description]
+Compatibility artifact:
+- `context/plans/active/<plan-name>/plan.md`
+- Keep this to a short synopsis and link to `plan.html`.
 
-**Current state**: What exists now (if anything).
+Before generating `plan.html`, read:
+- `context/standards/html-plan-standard.md`
 
-## Clarifications
+Use this high-level structure for implementation plans and PR breakdowns:
 
-| Aspect | Decision |
-|--------|----------|
-| [Ambiguity 1] | [Answer 1] |
-| [Ambiguity 2] | [Answer 2] |
+1. Hero/summary band:
+   - feature name,
+   - plan version/date/depth,
+   - target repo(s),
+   - Jira/PR/plan anchors,
+   - confidence and primary risk.
+2. Decisions and success:
+   - success criteria,
+   - decisions locked in,
+   - explicit non-goals.
+3. PR breakdown timeline:
+   - one milestone per PR slice,
+   - scope,
+   - target repo/files,
+   - dependencies,
+   - validation,
+   - exit criteria.
+4. Flow diagram:
+   - inline SVG data flow, service flow, UI flow, or deployment flow.
+5. Risk and operations:
+   - risks/mitigations,
+   - scalability plan,
+   - exception-handling plan,
+   - observability/alerting/dashboard plan,
+   - security/privacy/auth/tenancy notes.
+6. Review and handoff:
+   - files to inspect first,
+   - reviewer focus,
+   - open questions,
+   - copyable implementation or review prompt when useful.
 
-## User Stories
-
-### [User Type 1]
-
-- **Flow 1**: Step-by-step description of the user flow
-- **Flow 2**: Alternative flow or edge case
-
-### [User Type 2] (if applicable)
-
-- **Flow**: Description
-
-## Scope
-
-**In scope**:
-- [Feature 1]
-- [Feature 2]
-
-**Out of scope**:
-- [Not doing X] (reason)
-- [Not doing Y] (future consideration)
-
-**Stretch goals** (not commitments):
-- [Nice-to-have 1]
-
-## Risk Assessment
-
-| Risk | Severity | Likelihood | Mitigation | Residual Risk |
-|------|----------|-----------|------------|---------------|
-| [Risk 1] | high/med/low | high/med/low | [What we'll do] | [What remains] |
-
-## Work Breakdown
-
-| # | PR Scope | Target Repo | Dependencies | Estimated Size |
-|---|----------|-------------|--------------|----------------|
-| 1 | [What this PR does] | [repo name] | None | S/M/L |
-| 2 | [What this PR does] | [repo name] | PR 1 | S/M/L |
-
-## Design Decisions
-
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| [Decision 1] | [Option A] | [Why this over alternatives] |
-
-## Open Questions
-
-Questions that need codebase exploration in the target repo before implementation:
-- [Question 1 — what you need to find out]
-- [Question 2 — what pattern to look for]
-
-## References
-
-- [Link to research.md if available]
-- [Link to analysis.md if available]
-- [Relevant Confluence docs, Jira tickets, Slack threads]
+The full plan content belongs in `plan.html`, not `plan.md`.

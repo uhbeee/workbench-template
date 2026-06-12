@@ -43,10 +43,7 @@ if [[ ! -f "$ALLOWLIST" ]]; then
   exit 1
 fi
 
-ALLOWED_PATHS=()
-while IFS= read -r line; do
-  [[ -n "$line" ]] && ALLOWED_PATHS+=("$line")
-done < <(
+mapfile -t ALLOWED_PATHS < <(
   grep '^ *- ' "$ALLOWLIST" \
     | sed 's/^ *- *//; s/ *#.*//' \
     | tr -d '"' \
@@ -119,17 +116,17 @@ done
 header "Security Scan"
 
 sensitive_patterns=(
-  "seekout\.com"
+  "seekout"
   "zipstorm"
-  "api[_-]?key"
-  "secret[_-]?key"
-  "password\s*[:=]"
-  "Bearer\s+[A-Za-z0-9]"
+  "api[_-]?key[[:space:]]*[:=][[:space:]]*['\"]?(sk-[A-Za-z0-9._=-]{20,}|[A-Za-z0-9._=-]{0,31}[0-9][A-Za-z0-9._=-]{16,})"
+  "secret[_-]?key[[:space:]]*[:=][[:space:]]*['\"]?(sk-[A-Za-z0-9._=-]{20,}|[A-Za-z0-9._=-]{0,31}[0-9][A-Za-z0-9._=-]{16,})"
+  "password[[:space:]]*[:=][[:space:]]*['\"]?[^'\"[:space:]]{8,}"
+  "Bearer[[:space:]]+[A-Za-z0-9._-]{20,}"
 )
 
 found_sensitive=false
 for pattern in "${sensitive_patterns[@]}"; do
-  matches=$(grep -rli "$pattern" "$TEMPLATE_DIR" --include='*.md' --include='*.yaml' --include='*.yml' --include='*.sh' --include='*.py' --include='*.json' 2>/dev/null | grep -v '.git/' | grep -v 'template-sync\.sh' || true)
+  matches=$(grep -Erli --include='*.md' --include='*.yaml' --include='*.yml' --include='*.sh' --include='*.py' --include='*.json' --include='.gitignore' --include='.gitattributes' "$pattern" "$TEMPLATE_DIR" 2>/dev/null | grep -v '/\.git/' | grep -v 'template-sync\.sh' || true)
   if [[ -n "$matches" ]]; then
     found_sensitive=true
     fail "Pattern '$pattern' found in:"

@@ -1,10 +1,11 @@
 ---
 name: brainstorm
 description: "Freeform ideation and structured shortlisting. Generates 8-10 approaches including wild cards, then converges on 2-4 viable options with tradeoffs. Use before /forge or standalone for any creative exploration."
-argument-hint: <topic or problem statement>
+metadata:
+  workbench.argument-hint: "<topic or problem statement>"
 ---
 
-> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
+> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.codex/workbench-root` or `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
 
 # `/brainstorm` — Divergent Ideation + Convergent Shortlisting
 
@@ -63,11 +64,13 @@ If "brainstorm more" → loop back to Step 2 with refined constraints (max 2 loo
 
 ### Step 5: Output
 
-**Standalone mode**: Save to `context/notes/brainstorm/YYYY-MM-DD-slug.md` with:
+**Standalone mode**: If saving the brainstorm, read `context/standards/html-plan-standard.md` and save the primary artifact to `context/notes/brainstorm/YYYY-MM-DD-slug.html` with:
 - The full ideation list
 - The shortlist with evaluations
 - The selected approach(es)
 - Suggest: "Run `/forge <name>` to plan this."
+
+Create a `.md` file only as a short compatibility synopsis if another workflow needs Markdown.
 
 **Inside `/forge`**: Write to state.md:
 - Selected approach description

@@ -1,10 +1,11 @@
 ---
 name: security-scan
 description: Security audit with Security Engineer posture — OWASP Top 10, secrets detection, dependency risks
-argument-hint: (no arguments — reads git diff automatically)
+metadata:
+  workbench.argument-hint: "(no arguments — reads git diff automatically)"
 ---
 
-> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
+> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.codex/workbench-root` or `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
 
 # Security Scan
 

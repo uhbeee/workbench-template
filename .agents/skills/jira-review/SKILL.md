@@ -1,7 +1,8 @@
 ---
 name: jira-review
 description: Pull a Jira ticket with linked docs, tickets, comments, and PRs. Produces an actionable summary with assessment and open questions.
-argument-hint: <ticket-id>
+metadata:
+  workbench.argument-hint: "<ticket-id>"
 ---
 
 # Jira Review

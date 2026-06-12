@@ -1,10 +1,11 @@
 ---
 name: sounding-board
 description: Stress-test ideas with research-backed critical analysis. Steelmans positions, challenges assumptions, runs pre-mortems, explores alternatives. Use when making architecture decisions, evaluating technology choices, reviewing plans, or drafting communications.
-argument-hint: <topic-or-plan-name> [idea to challenge]
+metadata:
+  workbench.argument-hint: "<topic-or-plan-name> [idea to challenge]"
 ---
 
-> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
+> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.codex/workbench-root` or `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
 
 # Sounding Board Methodology
 
@@ -30,10 +31,16 @@ Before starting analysis:
 
 1. **Read `config.yaml`** from the repository root for organizational context.
 2. **Check `context/plans/active/`** — if the first argument matches a plan directory name:
-   - Read `context/plans/active/$0/research.md` as the evidence base
-   - Save analysis output to `context/plans/active/$0/analysis.md`
+   - Read `context/plans/active/$0/research.md` (or `research.html` as fallback) as the evidence base
+   - Save the primary analysis output to `context/plans/active/$0/analysis.md` (per the Artifact Format Standard — sounding-board analyses are text-heavy)
+   - Generate `analysis.html` only when the analysis has substantial visual content (matrices with semantic colors, side-by-side comparisons) that the MD can't carry
    - Update `state.md` with phase transition
 3. If no matching plan directory, operate in conversation only (no file output).
+4. **Invoke the `repo-context` skill** when the idea touches internal repos/services, product flows, infra, validation, or implementation approach. Use its bundled helper for deterministic output:
+   - `python3 <workbench-root>/.agents/skills/repo-context/scripts/repo_context.py explain --current --include-adjacent`
+   - or `python3 <workbench-root>/.agents/skills/repo-context/scripts/repo_context.py explain --repo <repo> --include-adjacent`
+   - or `python3 <workbench-root>/.agents/skills/repo-context/scripts/repo_context.py explain --service <service> --include-adjacent`
+   Treat repo-context as the default scope budget and include it as a source anchor in `analysis.html` when saved.
 
 ## Process
 
@@ -72,6 +79,8 @@ If the user provides enough context in their initial prompt (e.g., they link a f
 **Codebase exploration** (for architecture, technology, design, and implementation decisions):
 
 Start with any files/directories the user pointed to in Step 1, then explore outward:
+- Start with repo-context's relevant repos/services, adjacent dependencies, validation profiles, and repo-specific rule entrypoints.
+- Read repo-specific rule entrypoints before challenging a target repo's architecture or implementation path.
 - Use `Glob` to find relevant files by pattern (e.g., `**/*Controller*.cs`, `**/services/**/*.ts`)
 - Use `Grep` to search for specific patterns, interfaces, or usage of the technology under discussion
 - Use `Read` to examine key files — current implementations, abstractions, configuration, tests
@@ -159,6 +168,8 @@ Don't just analyze from the user's viewpoint. Explicitly adopt these lenses:
 ### Step 7: Produce the Assessment
 
 Use the appropriate format based on scenario type.
+
+If the assessment is saved, shared, or handed to another engineer/agent, read `context/standards/html-plan-standard.md` (the Artifact Format Standard). Sounding-board analyses default to **Markdown-first** — they're text-heavy critique docs. Use the sections below as the content structure inside `analysis.md`. Generate `analysis.html` as a visual companion only when the analysis has substantial visual content (matrices with semantic colors, side-by-side comparisons) that the MD can't carry well.
 
 **For technical decisions:**
 

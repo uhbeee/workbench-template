@@ -3,7 +3,7 @@ name: morning-triage
 description: Scan DMs, @mentions, Slack channels, and Jira to create a prioritized daily plan. Run this every morning to start the day focused.
 ---
 
-> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
+> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.codex/workbench-root` or `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
 
 # Morning Triage
 
@@ -88,6 +88,8 @@ Structure the plan with:
 6. **Meetings Today** — if mentioned in Slack or known.
 
 If the total estimated hours exceed available capacity, call this out explicitly and recommend what to defer.
+
+Keep `context/active/daily.md` as the automation source of truth. If the daily plan is meant to be reviewed or shared beyond the session, also create/update `context/active/daily.html` using `context/standards/html-plan-standard.md` as a companion view. Do not replace `daily.md`.
 
 ### Step 8: Present the Summary
 

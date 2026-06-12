@@ -1,10 +1,11 @@
 ---
 name: prd-create
-description: Generate a Product Requirement Document (PRD) for a new or updated feature with HTML mockups. Works standalone or integrated into the forge pipeline. Use when creating PRDs, defining product requirements, scoping features, or when the user mentions PRD, product requirements, feature spec, or requirements document.
-argument-hint: <plan-name> [--explore]
+description: Generate a Markdown-first Product Requirement Document (PRD) for a new or updated feature. Generates an HTML companion only when the PRD has substantial visual mockups, user-flow diagrams, or semantic-color comparison matrices. Works standalone or integrated into the forge pipeline. Use when creating PRDs, defining product requirements, scoping features, or when the user mentions PRD, product requirements, feature spec, or requirements document.
+metadata:
+  workbench.argument-hint: "<plan-name> [--explore]"
 ---
 
-> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
+> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.codex/workbench-root` or `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
 
 # PRD Creator
 
@@ -31,7 +32,7 @@ Generate a comprehensive Product Requirement Document that eliminates ambiguity 
 This skill operates in two modes:
 
 - **Standalone mode**: No forge artifacts exist. Runs full interview (Phases 1-7).
-- **Forge-integrated mode**: `state.md` exists with forge phase data (INTAKE answers, research, challenge findings). Abbreviated interview — skips topics already captured in state.md User Context. References research.md and analysis.md findings.
+- **Forge-integrated mode**: `state.md` exists with forge phase data (INTAKE answers, research, challenge findings). Abbreviated interview — skips topics already captured in state.md User Context. References `research.html` and `analysis.html` findings, with Markdown fallbacks for legacy plans.
 
 Detection: Check `<workbench>/context/plans/active/<name>/state.md`. If it exists and has a `Phase:` field → forge-integrated mode. Otherwise → standalone mode.
 
@@ -43,14 +44,19 @@ Detection: Check `<workbench>/context/plans/active/<name>/state.md`. If it exist
 
 **Actions**:
 
-1. Read `~/.claude/workbench-root` for workbench path. Read `config.yaml` for user identity and org context.
-2. Check for existing plan directory at `<workbench>/context/plans/active/<name>/`. Read any existing artifacts (state.md, research.md, analysis.md).
-3. **Standalone mode**: Ask the user: "What is your goal?" Get them to describe the feature or change they want to build.
-4. **Forge-integrated mode**: Read state.md User Context section. Summarize: "From forge, I know: [summary]. I'll focus the PRD interview on product definition gaps."
-5. Ask if they have supporting materials: existing documents, Figma mocks, Jira tickets, or other references.
-6. If a Figma URL is provided and Figma MCP is available, use `get_screenshot` and `get_design_context` to pull design details.
-7. If an existing document is referenced, read it.
-8. If a Jira ticket is referenced and Atlassian MCP is available, fetch its details.
+1. Read `~/.codex/workbench-root` or `~/.claude/workbench-root` for workbench path. Read `config.yaml` for user identity and org context.
+2. Check for existing plan directory at `<workbench>/context/plans/active/<name>/`. Read any existing artifacts (`state.md`, `research.html`, `analysis.html`, and legacy `research.md` / `analysis.md` when needed).
+3. Invoke the `repo-context` skill for preflight when a target repo/service/product is implied, especially when `--explore` is set. Use its bundled helper for deterministic output:
+   - `python3 <workbench>/.agents/skills/repo-context/scripts/repo_context.py explain --current --include-adjacent`
+   - or `python3 <workbench>/.agents/skills/repo-context/scripts/repo_context.py explain --repo <repo> --include-adjacent`
+   - or `python3 <workbench>/.agents/skills/repo-context/scripts/repo_context.py explain --service <service> --include-adjacent`
+   Save `repo-context.html` beside the PRD when output is saved. Use repo-context product/user context to shape testable user stories, but keep user-facing questions non-technical.
+4. **Standalone mode**: Ask the user: "What is your goal?" Get them to describe the feature or change they want to build.
+5. **Forge-integrated mode**: Read state.md User Context section. Summarize: "From forge, I know: [summary]. I'll focus the PRD interview on product definition gaps."
+6. Ask if they have supporting materials: existing documents, Figma mocks, Jira tickets, or other references.
+7. If a Figma URL is provided and Figma MCP is available, use `get_screenshot` and `get_design_context` to pull design details.
+8. If an existing document is referenced, read it.
+9. If a Jira ticket is referenced and Atlassian MCP is available, fetch its details.
 
 ---
 
@@ -68,6 +74,7 @@ Detection: Check `<workbench>/context/plans/active/<name>/state.md`. If it exist
    - Data models and API endpoints relevant to this feature
    - UI components and pages that may be affected
 2. Summarize findings internally — these inform your questions but are NOT exposed to the user
+3. Before exploring a target repo, read repo-specific rule entrypoints returned by repo-context (`repo_rule_entrypoints`, `instruction_dirs`, `context_files`, service `inspect_first`). Record the rules read in the PRD's engineering-notes/source-context section.
 
 ---
 
@@ -126,9 +133,11 @@ Detection: Check `<workbench>/context/plans/active/<name>/state.md`. If it exist
 
 **Actions**:
 
-1. Write the PRD following the template at `references/prd-template.md` (relative to this skill).
-2. Save to `<workbench>/context/plans/active/<name>/prd.md`
-3. Output the full PRD content directly to the user so they can review it immediately.
+1. Read `context/standards/html-plan-standard.md` because a PRD is a planning artifact consumed by design and engineering.
+2. Write `prd.html` as the primary human-readable PRD. Use the HTML standard: summary band, user flows, scope, risks, open questions, design/mockup links, and review-friendly navigation.
+3. Write `prd.md` only as a concise compatibility version following the template at `references/prd-template.md` (relative to this skill) when Forge or an existing workflow still needs Markdown PRD context.
+4. Save both files to `<workbench>/context/plans/active/<name>/`.
+5. Output a concise summary and the `prd.html` path so the user can review it immediately.
 
 ---
 
@@ -158,7 +167,7 @@ Detection: Check `<workbench>/context/plans/active/<name>/state.md`. If it exist
 
 5. **Stop the server** — When the user is done reviewing, kill the background serve process.
 
-6. **Update the PRD** — Add mockup references to the PRD's Design section with the screen table.
+6. **Update the PRD** — Add mockup references to the PRD's Design section in `prd.html`, and in the concise `prd.md` only when that compatibility file exists.
 
 > **Note**: The mockup template uses a generic design system with semantic color tokens, typography utilities, and component recipes. For project-specific mockups, customize `references/mockup-template.html` with your project's design tokens, colors, and typography. This is a known gap — the default template works as wireframe-level reference for any project.
 
@@ -184,10 +193,11 @@ Detection: Check `<workbench>/context/plans/active/<name>/state.md`. If it exist
 
 **Actions**:
 
-1. Ensure `prd.md` and `mocks/` are saved to `<workbench>/context/plans/active/<name>/`
+1. Ensure `prd.html`, optional compatibility `prd.md`, and `mocks/` are saved to `<workbench>/context/plans/active/<name>/`
 2. If in forge-integrated mode, update state.md to note PRD completion
 3. Present summary:
-   - PRD location
+   - PRD HTML location
+   - PRD Markdown compatibility location, only if created
    - Number of mockup screens generated
    - Suggested next step:
      - **Standalone**: "Run `/forge <name>` to create an engineering plan, or use this PRD directly for stakeholder review."

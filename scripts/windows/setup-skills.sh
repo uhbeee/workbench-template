@@ -14,7 +14,7 @@ SKILLS_DST="$HOME/.claude/skills"
 SKILLS=(
     cut-release
     hotfix
-    feature-worktree-create
+    worktree-feature-create
     worktrees
 )
 

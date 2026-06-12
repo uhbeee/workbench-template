@@ -12,6 +12,6 @@ Read and apply the full methodology from `.agents/skills/sounding-board/SKILL.md
    - [Gap 2]: ...
    ```
 3. **Tag each challenge** — every challenge must be tagged: **blocker** (must address before plan), **risk** (should address), or **note** (nice to address). REFINE presents blockers first.
-4. **Output location** — write `analysis.md` to `context/plans/active/<plan-name>/`.
-5. **Quick depth** — do NOT run this phase. Instead, the forge orchestrator does a 3-minute inline sanity check ("2 things that could go wrong"). No analysis.md is written for quick depth.
+4. **Output location** — write `analysis.html` to `context/plans/active/<plan-name>/`. Create `analysis.md` only as a short compatibility synopsis when needed.
+5. **Quick depth** — do NOT run this phase. Instead, the forge orchestrator does a 3-minute inline sanity check ("2 things that could go wrong"). No analysis artifact is written for quick depth.
 6. **Deep depth** — run two passes. Second pass re-evaluates after any REFINE changes from the first pass.

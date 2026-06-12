@@ -1,24 +1,23 @@
 @echo off
 setlocal enabledelayedexpansion
-call "%~dp0wt-config.cmd"
-set "ORIG_DIR=%CD%"
-set "ORIG_DIR=!ORIG_DIR:\=/!"
-set "ORIG_DIR=!ORIG_DIR:C:/=/c/!"
-set "ORIG_DIR=!ORIG_DIR:D:/=/d/!"
+call "%~dp0wt-config.cmd" 2>nul
+if "%WORKBENCH_ROOT%"=="" (
+  for %%I in ("%~dp0..\..\..") do set "WORKBENCH_ROOT=%%~fI"
+)
+if "%PYTHON_BIN%"=="" set "PYTHON_BIN=python"
 
-REM Get the branch name (first non-flag argument)
-set "BRANCH_NAME=%~1"
+set "OUT_FILE=%TEMP%\wt-feature-%RANDOM%-%RANDOM%.out"
+"%PYTHON_BIN%" "%WORKBENCH_ROOT%\scripts\worktrees\wt_feature.py" --workdir "%CD%" %* > "%OUT_FILE%" 2>&1
+set "RC=%ERRORLEVEL%"
+set "WT_PATH="
 
-REM Run the feature script
-"%GIT_BASH%" "%SCRIPTS_PATH%/wt-feature.sh" %* --workdir "!ORIG_DIR!"
-if errorlevel 1 goto :eof
+for /f "usebackq delims=" %%L in ("%OUT_FILE%") do (
+  echo %%L
+  set "LINE=%%L"
+  if "!LINE:~0,14!"=="WORKTREE_PATH=" set "WT_PATH=!LINE:~14!"
+)
+del "%OUT_FILE%" 2>nul
 
-REM Extract directory name from branch (remove prefix like joshua/)
-for %%I in ("%BRANCH_NAME%") do set "DIR_NAME=%%~nxI"
-for /f "tokens=* delims=/" %%A in ("%DIR_NAME%") do set "DIR_NAME=%%A"
-
-REM Find repo root and cd to the new worktree
-for /f "delims=" %%R in ('git rev-parse --git-common-dir 2^>nul') do set "REPO_ROOT=%%R"
-if "!REPO_ROOT!"=="." set "REPO_ROOT=%CD%"
-
-endlocal & cd /d "%REPO_ROOT%\_feature\%DIR_NAME%"
+if not "%RC%"=="0" exit /b %RC%
+if not "%WT_PATH%"=="" cd /d "%WT_PATH%"
+exit /b 0

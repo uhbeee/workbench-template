@@ -1,0 +1,35 @@
+{
+  "skill_name": "worktrees",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Show me the current worktree status for recruit-api.",
+      "expected_output": "Runs the skill-local scripts/wt_status.py symlink for recruit-api, summarizes worktree paths, branches, dirty state, and ahead/behind status, and does not create, remove, or clean worktrees.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Which worktree should my agent use before changing code in example-service?",
+      "expected_output": "Inspects managed worktrees read-only through scripts/wt_status.py, reports the relevant example-service worktrees and dirty state, and recommends using worktree-feature-create if a suitable feature worktree does not already exist.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "On Windows, show worktree status for backend.",
+      "expected_output": "Uses scripts/wt_status.py with a Windows Python launcher such as py -3 without creating, deleting, or switching worktrees.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Find the recruit-api worktree for mcp-calls-recruit-api-for-everything so the agent can work there.",
+      "expected_output": "Uses the worktrees skill directly, runs scripts/wt_resolve.py with --repo recruit-api and the worktree name, prints WORKTREE_PATH, reports repo/name/kind/branch, and tells the agent to use that path as workdir rather than trying to persist a shell cd.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "List feature worktrees in example-service.",
+      "expected_output": "Uses the worktrees skill directly, runs scripts/wt_resolve.py --repo example-service --kind feature --list, reports matching feature worktree paths and branches, and performs no create/remove operations.",
+      "files": []
+    }
+  ]
+}

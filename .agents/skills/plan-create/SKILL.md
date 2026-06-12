@@ -1,14 +1,15 @@
 ---
 name: plan-create
-description: Create a strategic feature plan with work breakdown and a handoff prompt for the target repo. Interviews for ambiguities, reads research/analysis artifacts if available. Use after research and refinement, or standalone when you already have context.
-argument-hint: <plan-name>
+description: Create a Markdown-first strategic feature plan with work breakdown and a handoff prompt for the target repo. Interviews for ambiguities, reads research/analysis artifacts if available. Use after research and refinement, or standalone when you already have context.
+metadata:
+  workbench.argument-hint: "<plan-name>"
 ---
 
-> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
+> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.codex/workbench-root` or `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
 
 # Plan Create
 
-Create a strategic feature plan with work breakdown and a handoff prompt ready to paste into the target repo. This skill interviews the user to resolve all ambiguities, synthesizes research and analysis artifacts, and produces two deliverables: a `plan.md` (strategic plan) and a `handoff.md` (ready-to-paste prompt for implementation).
+Create a strategic feature plan with work breakdown and a handoff prompt ready to paste into the target repo. This skill interviews the user to resolve all ambiguities, synthesizes research and analysis artifacts, and produces a Markdown-first plan plus implementation handoff: `plan.md` (primary source-of-truth plan), `plan.html` (optional visual companion when the plan has substantial diagrams or visual hierarchy), and `handoff.md` (ready-to-paste prompt for implementation).
 
 ## Process
 
@@ -17,10 +18,19 @@ Create a strategic feature plan with work breakdown and a handoff prompt ready t
 1. **Read `config.yaml`** from the repository root for user identity, GitHub repos, Jira projects, and Confluence spaces.
 2. **Determine the plan name** from the first argument (`$0`). If no argument, use `AskUserQuestion` to get it.
 3. **Check for existing artifacts** at `context/plans/active/<plan-name>/`:
-   - `research.md` — evidence base from the researcher
-   - `analysis.md` — critical analysis from the sounding board
+   - `plan.html` — primary HTML plan artifact
+   - `plan.md` — compatibility synopsis or older Markdown plan
+   - `research.html` — primary evidence base from the researcher
+   - `analysis.html` — primary critical analysis from the sounding board
+   - `research.md` / `analysis.md` — compatibility synopses or legacy artifacts
    - `state.md` — current phase tracking
-4. If neither `research.md` nor `analysis.md` exists, that's fine — the user may have context from other sources or wants to plan from scratch. Note this and proceed.
+4. If neither `research.html` nor `analysis.html` exists, that's fine — the user may have context from other sources or wants to plan from scratch. Note this and proceed.
+5. **Run repo-context preflight** by invoking the `repo-context` skill when the user, artifacts, or current directory imply a target repo/service. Use its bundled helper for deterministic output:
+   - `python3 <workbench-root>/.agents/skills/repo-context/scripts/repo_context.py explain --repo <repo> --include-adjacent`
+   - or `python3 <workbench-root>/.agents/skills/repo-context/scripts/repo_context.py explain --service <service> --include-adjacent`
+   - Use `--current` when invoked from the target repo worktree.
+   - Save a scoped packet when the plan will be saved: `python3 <workbench-root>/.agents/skills/repo-context/scripts/repo_context.py snapshot --repo <repo> --include-adjacent --output context/plans/active/<plan-name>/repo-context.html`.
+   - Read repo-specific rule entrypoints returned by repo-context (`repo_rule_entrypoints`, `instruction_dirs`, `context_files`, service `inspect_first`) before finalizing target repo assumptions.
 
 ### Step 2: Initialize Plan Directory
 
@@ -63,11 +73,15 @@ Resolve all ambiguities through an iterative interview using `AskUserQuestion`. 
 - Continue iterating until all ambiguities are resolved — there is no limit on rounds
 - If the user says "whatever you think is best", provide your recommendation and get explicit confirmation
 - If research/analysis artifacts exist, reference specific findings when asking questions
-- Don't ask questions that are already answered in `research.md` or `analysis.md`
+- Don't ask questions that are already answered in `research.html` or `analysis.html` when present, with Markdown fallbacks for legacy plans
 
 ### Step 4: Create the Plan
 
-Produce `context/plans/active/<plan-name>/plan.md` using the plan template from `references/plan-template.md`.
+Read `context/standards/html-plan-standard.md` (the Artifact Format Standard) before writing the plan. Plans default to **Markdown-first** per that standard.
+
+Produce `context/plans/active/<plan-name>/plan.md` as the primary plan artifact. Use heading hierarchy for navigation, tables for facts, fenced code blocks for commands/contracts, and inline ASCII or Mermaid diagrams for simple data flow.
+
+Generate `context/plans/active/<plan-name>/plan.html` as an **optional visual companion** ONLY when the plan has substantial visual content the MD can't carry well — multi-arrow SVG architecture diagrams, dense mockups, color-coded risk matrices, side-by-side comparisons. When you do generate the HTML companion, follow the implementation-plan pattern from `https://thariqs.github.io/html-effectiveness/16-implementation-plan.html`. When the plan is mostly prose + tables, skip the HTML — the MD is enough.
 
 The plan must include:
 - **Overview**: What this is, why it matters, current state
@@ -75,7 +89,13 @@ The plan must include:
 - **User stories**: Concrete workflows per user type
 - **Scope**: In-scope, out-of-scope, stretch goals
 - **Risk assessment**: Risks with severity, likelihood, and mitigations
-- **Work breakdown**: PR-level scope with dependencies and target repo
+- **Work breakdown**: PR-level scope with dependencies, target repo, validation, and exit criteria
+- **Repo context**: linked `repo-context.html`, relevant repos/services, adjacent dependencies, repo-specific rules read, and validation profiles
+- **PR breakdown timeline**: milestone-style slices modeled after the HTML implementation-plan example
+- **Architecture/data-flow diagram**: inline SVG when the plan touches services, data flow, queues, APIs, UI/backend boundaries, or deployment flow
+- **Scalability plan**: scale assumptions, bounds, and verification method
+- **Exception-handling plan**: typed/narrow failures, retryability, fallback semantics, telemetry, and failure-path tests
+- **Observability plan**: metrics/logs/traces, alerts, dashboards, owner/runbook expectations
 - **Design decisions**: Key choices with rationale
 - **Open questions**: Anything that needs codebase exploration in the target repo
 
@@ -90,7 +110,7 @@ The handoff prompt is a self-contained document designed to be pasted into a Cla
 - Decisions locked in during refinement — prevents re-opening settled questions
 - Open technical questions — things that need codebase exploration
 - Progress tracking section — tells the implementing agent where and how to write back progress
-- Suggested next step: run `/plan-create` in the target repo for implementation-level planning
+- Suggested next step: open `plan.md` (or `plan.html` if a visual companion was generated), paste/use `handoff.md` in the target repo, and begin codebase exploration for the open technical questions
 
 **Template variables to fill in**:
 - Replace `[COMMAND_CENTER_PATH]` with the absolute path to the command center repo root (read from the current working directory)
@@ -102,17 +122,20 @@ The handoff prompt is a self-contained document designed to be pasted into a Cla
    - Set phase to `completed`
    - Log the completion timestamp
 2. Present a summary to the user:
+   - HTML plan path and how to open it locally
    - Plan overview (2-3 sentences)
    - Key decisions made
    - Work breakdown summary (number of PRs, estimated scope)
    - Next step: copy `handoff.md` to the target repo
+3. **Offer the implementation path** (when the plan has a PR-level breakdown): the **canonical** way to implement is the autonomous `plan-to-workflow` skill — it turns the breakdown into a runnable Workflow whose every PR runs `worktree → implement → E2E → review-gauntlet → ship`. Mention it: "To implement, run `/plan-to-workflow <plan-dir>` for an autonomous Workflow, or drive it interactively with `plan-implement → review-gauntlet → ship` (the fallback over the same stages)." See `../plan-to-workflow/references/orchestration-model.md`.
 
 ## Key Principles
 
 - **Interview depth over speed.** A 15-minute interview saves days of wrong-direction implementation. Don't rush it.
 - **PR-level granularity.** The work breakdown should be specific enough that each item maps to a single PR. Vague items like "implement the feature" are useless.
 - **The handoff is the product.** The plan is for the user. The handoff is for the implementation session. Both must be complete and self-contained.
-- **Reference the evidence.** When making claims in the plan, reference findings from `research.md` and `analysis.md`. Don't assert things that weren't established during research.
+- **HTML is the plan surface.** Use Markdown only as a short compatibility/index file when another skill expects it.
+- **Reference the evidence.** When making claims in the plan, reference findings from `research.html` and `analysis.html`, using Markdown fallbacks only for legacy plans. Don't assert things that weren't established during research.
 - **Decisions are final.** Once captured in the clarifications table, decisions don't get re-opened in the handoff. The implementation session should not re-litigate what was decided here.
 
 ## Important Notes

@@ -1,41 +1,19 @@
 @echo off
 setlocal enabledelayedexpansion
-call "%~dp0wt-config.cmd"
-set "ORIG_DIR=%CD%"
-set "ORIG_DIR=!ORIG_DIR:\=/!"
-set "ORIG_DIR=!ORIG_DIR:C:/=/c/!"
-set "ORIG_DIR=!ORIG_DIR:D:/=/d/!"
-
-REM Get repo root before running (in case we're inside a worktree being deleted)
-for /f "delims=" %%R in ('git rev-parse --git-common-dir 2^>nul') do set "REPO_ROOT=%%R"
-if "!REPO_ROOT!"=="" set "REPO_ROOT=%CD%"
-if "!REPO_ROOT!"=="." set "REPO_ROOT=%CD%"
-
-REM Convert to Windows path
-set "REPO_ROOT=!REPO_ROOT:/=\!"
-set "REPO_ROOT=!REPO_ROOT:\c\=C:\!"
-set "REPO_ROOT=!REPO_ROOT:\d\=D:\!"
-
-REM Run the remove script
-"%GIT_BASH%" "%SCRIPTS_PATH%/wt-remove.sh" %* --workdir "!ORIG_DIR!"
-set "REMOVE_RC=!ERRORLEVEL!"
-
-set "FINAL_ROOT=!REPO_ROOT!"
-
-REM Only cd to repo root if removal succeeded (exit code 0)
-endlocal & set "REMOVE_RC=%REMOVE_RC%" & (
-    if "%REMOVE_RC%"=="0" (
-        cd /d "%FINAL_ROOT%"
-
-        if exist "%TEMP%\wt-remove-cleanup.txt" (
-            set /p CLEANUP_PATH=<"%TEMP%\wt-remove-cleanup.txt"
-            del "%TEMP%\wt-remove-cleanup.txt" 2>nul
-
-            setlocal enabledelayedexpansion
-            if not "!CLEANUP_PATH!"=="" (
-                rd /s /q "!CLEANUP_PATH!" 2>nul && echo Removed directory.
-            )
-            endlocal
-        )
-    )
+call "%~dp0wt-config.cmd" 2>nul
+if "%WORKBENCH_ROOT%"=="" (
+  for %%I in ("%~dp0..\..\..") do set "WORKBENCH_ROOT=%%~fI"
 )
+if "%PYTHON_BIN%"=="" set "PYTHON_BIN=python"
+
+set "REPO_ROOT="
+for /f "delims=" %%R in ('git rev-parse --git-common-dir 2^>nul') do set "REPO_ROOT=%%R"
+if "%REPO_ROOT%"=="." set "REPO_ROOT=%CD%"
+
+"%PYTHON_BIN%" "%WORKBENCH_ROOT%\scripts\worktrees\wt_remove.py" --workdir "%CD%" %*
+set "RC=%ERRORLEVEL%"
+
+if "%RC%"=="0" (
+  if not "%REPO_ROOT%"=="" cd /d "%REPO_ROOT%"
+)
+exit /b %RC%
