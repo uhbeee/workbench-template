@@ -1,0 +1,167 @@
+{
+  "skill_name": "agent-flow",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Orchestrate PROJ-1234. I need enough context for another engineer to review the work later.",
+      "expected_output": "Reads Jira context when available, creates context/work-items/PROJ-1234/context-packet.html, identifies likely repos/services, asks only blocking clarification questions, and recommends the next step.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Create a reviewer packet for PR #215 in example-service. Include any other repos the reviewer should inspect if the UI calls into backend services.",
+      "expected_output": "Creates reviewer-packet.html with Jira/PR context, repos to check out, files to read first, service interaction map, validation plan or required proof, validation evidence and gaps, engineering invariants to enforce, repo-specific invariant docs when present, and a prompt for another engineer's agent.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Review from context/work-items/PROJ-1234/reviewer-packet.html. Do not modify files.",
+      "expected_output": "Checks required local repos from the packet, stops with checkout commands if required repos are missing, otherwise reads engineering invariants, repo-specific invariant docs, validation-plan.html, and validation-evidence.html when present, reviews the PR/diff, flags invariant and validation gaps as findings, and writes external-review-findings.html.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Start from context/plans/active/agent-flow/plan.html and prepare this for review. We do not have a Jira ticket yet.",
+      "expected_output": "Uses the HTML plan as the anchor, creates a work item under a plan slug, records Jira as not created yet or draft only, drafts jira-draft.html by default, creates or recommends a reviewer/context packet, and asks for explicit approval before any Jira write.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Create a Jira draft from context/work-items/agent-flow/context-packet.html, but do not create the Jira ticket yet.",
+      "expected_output": "Writes jira-draft.html with summary, problem, acceptance criteria, affected repos/services, and suggested project key; asks for approval before any Jira write.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Prepare this plan for a Claude/Codex paired review. Use local Workbench context if it exists, and give me the prompts to run in each terminal.",
+      "expected_output": "Uses local Workbench artifacts as the richest context, creates paired-agent-prompts.html with Claude and Codex prompts, identifies shared packet paths and expected findings files, and does not require publishing to Jira/PR.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "Publish the reviewer packet for this PR so someone without my Workbench can ask their agent to review it.",
+      "expected_output": "Creates a Jira/PR-safe Agent Review Packet summary from local context, asks for approval before writing to Jira or GitHub, and avoids relying only on private local paths.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "We started from plan xyz and created Jira PROJ-456 later. Create the review packet without changing the work item folder slug.",
+      "expected_output": "Keeps context/work-items/xyz as the stable folder, records PROJ-456 as a linked Jira anchor in anchors.html, reads both plan and Jira context, and calls out conflicts rather than choosing one silently.",
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "We already started implementing this in chat and never made a plan or Jira ticket. Capture this conversation as a work item and create the review document so another engineer understands the context.",
+      "expected_output": "Creates a stable chat-first work item, writes chat-capture.html with durable decisions/scope/assumptions, records Jira as not created yet and plan as none, creates context-packet.html and reviewer-packet.html when implementation context exists, and does not require a plan or Jira ticket first.",
+      "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "Run the full agent-flow workflow from this Jira ticket: plan it, have another agent review the plan, implement it, have another agent review the implementation, keep iterating until it is clean, then prepare the review packet and PR.",
+      "expected_output": "Uses agent-flow as the single lifecycle owner, creates lifecycle.html, gates.html, pipeline.html, planning-interview.html, validation-plan.html, plan.html, pr-breakdown.html, and watch-prompts.html, interviews the user before finalizing the plan using AskUserQuestion in Claude or request_user_input in Codex when available, has the agent propose QA-grounded repo-native validation options including explicit API/data calls, Docker/containerized runtime proof when needed, happy path, edge cases, and negative/failure cases, and the user confirms or explicitly delegates the validation bar, drafts Jira tracking by default unless the user opted out, uses visible watch-mode terminals for plan review, implementation, implementation validation, implementation review, review-fix validation, and PR review, writes validation-evidence.html with commands, working directories, exit status, and result summaries, requires reviewers to enforce content/intent plus engineering and repo-specific invariants plus validation gaps, keeps loops bounded to one reviewer pass per stage unless the user asks for more, creates final reviewer-packet.html and pr-draft.html only with validation evidence or an explicit user-approved exception, and asks before pushing, creating a PR, or updating Jira/GitHub.",
+      "files": []
+    },
+    {
+      "id": 11,
+      "prompt": "Do not use the Workbench implement skill. I want the Helix implementation workflow, but I do not want headless agents. I want to see Claude and Codex progress while it is mostly hands-free.",
+      "expected_output": "Selects full or watch mode, explains the visible two-terminal workflow, writes or updates pipeline.html, review-handoff.html, validation-plan.html, validation-evidence.html, pr-breakdown.html, watch-prompts.html, implementation.html, findings files, summary.html, and manual-verification.html, states that agents run in normal interactive terminals instead of headless mode, clarifies that private chain-of-thought is not exposed but visible rationale, findings, decisions, tests, validation results, and blockers are written to artifacts and terminal output, requires the reviewer to write findings to the exact path in review-handoff.html even when there are no issues, requires the implementer to read that findings artifact before advancing, and preserves explicit gates for validation, manual verification, PR creation, pushes, and Jira/GitHub updates.",
+      "files": []
+    },
+    {
+      "id": 12,
+      "prompt": "Make sure reviewers enforce the generalized Helix invariants too: observability, clean code, DRY, maintainability, alerting, dashboards, good structure, and readability.",
+      "expected_output": "Adds or uses engineering-invariants.md as mandatory reviewer criteria, requires review-packet, review, watch, plan-review, implementation-review, and PR-review prompts to enforce those invariants alongside content/intent, correctness, security, tests, and operational risk, marks invariant violations explicitly in findings, requires no-findings artifacts to state content/intent checked and invariants checked, and keeps repo-specific invariants extensible through Workbench or target-repo docs.",
+      "files": []
+    },
+    {
+      "id": 13,
+      "prompt": "Also enforce scalability planning and make sure exception handling is done well.",
+      "expected_output": "Treats scalability planning and exception handling as first-class engineering invariants. Plan review checks scale assumptions, bounding strategy, and verification. Implementation and PR review check bounded fan-out, retries, backpressure, idempotency, timeouts, typed/narrow exception handling, safe fallbacks, telemetry, and failure-path tests. Weak scalability or exception handling is reported as a finding.",
+      "files": []
+    },
+    {
+      "id": 14,
+      "prompt": "When agent-flow creates plans or PR breakdowns, make them HTML artifacts. PR breakdowns should follow the implementation-plan style from thariqs html-effectiveness example.",
+      "expected_output": "Reads context/standards/html-plan-standard.md, creates plan.html as the primary plan artifact, creates pr-breakdown.html for PR slicing, does not create Markdown companion artifacts, reads legacy Markdown only as fallback input when the matching HTML artifact is missing, and structures PR breakdowns with a summary strip, milestone timeline, PR Breakdown And Worktree Contract section, dependency graph, data/service flow SVG, risky code or contract snippets, risk table, open questions, validation, and reviewer focus modeled on the implementation-plan example.",
+      "files": []
+    },
+    {
+      "id": 15,
+      "prompt": "/agent-flow",
+      "expected_output": "Does not create a work item, fetch Jira/PR details, or write artifacts yet. Asks the user to choose both entrypoint and mode, explains each entrypoint option and each mode option in plain language, gives examples such as current chat + capture, PROJ-1234 + full, or context/work-items/foo + watch, and waits for the user's choice.",
+      "files": []
+    },
+    {
+      "id": 16,
+      "prompt": "/agent-flow PROJ-1234",
+      "expected_output": "Detects PROJ-1234 as a Jira entrypoint but does not proceed silently. Asks the user to choose a mode, explains the available modes, recommends context for discovery or full for the visible plan-to-PR lifecycle, and waits for confirmation before reading Jira details or writing artifacts.",
+      "files": []
+    },
+    {
+      "id": 17,
+      "prompt": "Make sure agent-flow has validation gates so the agents can prove whether the code actually works before review packets or PR handoff.",
+      "expected_output": "Treats validation as a first-class gate created during the planning interview. Requires planning-interview.html and a user-confirmed or explicitly delegated validation-plan.html before implementation or review handoff, grounds recommendations in validation-practices.md, prefers explicit API/tool/runtime calls to fetch or verify needed data, uses Docker Compose or Testcontainers-style proof when realistic dependencies are needed, requires happy path plus high-value edge and negative/failure scenarios for non-trivial work, creates validation-evidence.html after implementation and after accepted review fixes, records command, working directory, timestamp, exit status, scope, and result summary, blocks reviewer packet, PR draft, publish, or done states when relevant validation is missing, failed, blocked, or unverified unless an explicit user-approved exception is recorded, and requires reviewers to report weak or missing validation as findings.",
+      "files": []
+    },
+    {
+      "id": 18,
+      "prompt": "Where is the planning phase in agent-flow? It should interview me like Helix and Forge, and validation should come from me with the agent helping.",
+      "expected_output": "Makes plan mode the explicit planning interview phase. Creates planning-interview.html before plan.html, asks focused user questions using AskUserQuestion in Claude or request_user_input in Codex when available about intended behavior, success criteria, scope, non-goals, affected repos/services, rollout, risks, observability, scalability, exception handling, and validation. The agent proposes validation options from repo-native signals and validation-practices.md, including explicit API/data calls, Docker/container proof when dependencies matter, happy path, edge cases, and negative/failure cases, asks the user to confirm which proof is required before PR handoff or records explicit delegation, then creates validation-plan.html from that confirmed interview rather than from implementation-time guessing alone.",
+      "files": []
+    },
+    {
+      "id": 19,
+      "prompt": "Ground agent-flow validation recommendations in real QA practice. The plan should recommend API calls for data, Docker/container scenarios, happy paths, and edge cases.",
+      "expected_output": "Reads references/validation-practices.md before planning validation, explains that the recommendation is risk-based and layered, proposes the smallest sufficient validation set across static checks, unit/component tests, API/runtime calls, contract checks, Docker Compose or Testcontainers-style integration proof, UI/browser checks, and manual checks. The validation plan names happy path, high-value edge cases, negative/failure cases, data prerequisites, exact commands or API calls, container setup when needed, expected results, and evidence to capture.",
+      "files": []
+    },
+    {
+      "id": 20,
+      "prompt": "For UI validation, make sure agent-flow uses browser-use in Codex, Claude-in-Chrome in Claude, then Playwright MCP or CLI, and tells me if none are available.",
+      "expected_output": "Reads references/validation-practices.md and follows the browser validation tool order. In Codex, it uses the browser-use/Browser skill when available. In Claude, it uses Claude-in-Chrome or Chrome MCP when available. If those are unavailable, it uses Playwright MCP, then repo-local Playwright CLI. If no browser automation path is available, it does not claim browser validation and instead tells the user what was unavailable plus exact manual validation steps.",
+      "files": []
+    },
+    {
+      "id": 21,
+      "prompt": "In agent-flow full mode, break this feature into the default small human-readable PRs. It may have one API foundation PR, one service PR, and one UI integration PR, and some could run in worktrees.",
+      "expected_output": "Creates or updates pr-breakdown.html by default with small reviewable PR slices, each with title, goal, scope, out-of-scope items, related files, estimated meaningful lines, dependencies, base repo path, base branch, branch/worktree suggestion, exact base-repo wt-feature setup command or script fallback, parallelizable or sequential status, validation, stop rules, and reviewer focus. It includes a visible PR Breakdown And Worktree Contract section, records independent slices as worktree-parallelizable, dependent slices as sequential, does not create Markdown companions, and writes worktree-plan.html only when branch/worktree commands are useful.",
+      "files": []
+    },
+    {
+      "id": 23,
+      "prompt": "For agent-flow, do not create md work item files anymore. Make the lifecycle, gates, activity, prompts, findings, Jira draft, and PR draft all HTML.",
+      "expected_output": "Creates durable agent-flow work-item artifacts as HTML files: lifecycle.html, gates.html, pipeline.html, review-handoff.html, activity.html, paired-agent-prompts.html, watch-prompts.html, review-plan-findings.html, review-implementation-findings.html, review-pr-findings.html, external-review-findings.html, jira-draft.html, and pr-draft.html. It reads legacy Markdown artifacts only as fallback input when a matching HTML file does not exist, migrates the next write to HTML, and does not create new Markdown companion files.",
+      "files": []
+    },
+    {
+      "id": 24,
+      "prompt": "There is a Claude Code reviewer following along while Codex implements PR 1. Make this autonomous enough that Codex respects Claude's comments without me pasting them.",
+      "expected_output": "Creates or updates review-handoff.html with the current slice, target repo/branch, reviewer role, implementer role, exact reviewer findings path, exact implementer read path, and review status. It writes watch-prompts.html or paired-agent-prompts.html with explicit reviewer instructions to write review-implementation-findings.html even if no issues are found, and explicit implementer instructions to read review-handoff.html and review-implementation-findings.html before starting PR 2. It explains that live terminal stdout is not shared, so shared artifacts are the coordination plane, and it stops or asks before advancing when expected reviewer output is missing.",
+      "files": []
+    },
+    {
+      "id": 25,
+      "prompt": "For an agent-flow PR slice in example-api, make sure the agent creates or uses the right worktree before changing code.",
+      "expected_output": "Uses the worktree-feature-create skill or equivalent Workbench script flow. It calls scripts/wt_feature.py from the skill's scripts directory, starts from the configured repo base path internally, enters the resulting _feature/<branch-leaf> worktree, checks git status, and does not make code changes directly in main, develop, or the repo base directory.",
+      "files": []
+    },
+    {
+      "id": 26,
+      "prompt": "Set up agent-flow so Claude is the implementer and Codex is the reviewer. I want this to be easy to run in two visible terminals.",
+      "expected_output": "Asks or confirms one simple role-assignment question when the assignment is missing, accepts plain answers such as 'Claude implements, Codex reviews', records Implementer session=Claude and Reviewer session=Codex in review-handoff.html, writes paired-agent-prompts.html or watch-prompts.html with section labels matching those roles, includes exact copy-paste prompts for each terminal, and includes the exact findings output path the Codex reviewer must write before Claude advances.",
+      "files": []
+    },
+    {
+      "id": 27,
+      "prompt": "Use agent-flow for this chat-started work, but do not create or update Jira for it.",
+      "expected_output": "Treats Jira as explicitly opted out for this work item, records Jira: opted out by user in anchors.html and relevant packets, does not draft or publish Jira updates, still creates local context/review artifacts, and reviewers use plan/chat/PR content plus engineering invariants as the source of truth.",
+      "files": []
+    },
+    {
+      "id": 22,
+      "prompt": "Use agent-flow, but bypass the nitty gritty PR breakdown this time. I just want one coarse PR unless that is a bad idea.",
+      "expected_output": "Treats this as an explicit coarse/single-PR bypass request, briefly shows the default small-PR sequence and the coarse alternative, pushes back when the work crosses risky boundaries such as migrations, auth, tenancy, generated contracts, cross-repo contracts, or broad runtime behavior, and if the user approves the bypass records the reason, residual review risk, validation implications, and fallback split in planning-interview.html, gates.html, and pr-breakdown.html.",
+      "files": []
+    }
+  ]
+}

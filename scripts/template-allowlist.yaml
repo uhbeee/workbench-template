@@ -30,6 +30,7 @@ include:
   - .agents/skills/meeting-prep/
   - .agents/skills/morning-triage/
   - .agents/skills/add-skill/
+  - .agents/skills/agent-flow/
   - .agents/skills/brainstorm/
   - .agents/skills/forge/
   - .agents/skills/implement/
@@ -82,6 +83,7 @@ include:
   - templates/
   - config.example.yaml
   - context/calibration.example.md
+  - skills-global.yaml
   - AGENTS.md
   - README.md
   - .gitignore

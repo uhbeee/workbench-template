@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PR Breakdown And Worktree Contract</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --ink: #1f2933;
+      --muted: #64748b;
+      --line: #d8dee8;
+      --accent: #2563eb;
+      --ok: #18794e;
+      --warn: #b45309;
+      --risk: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    header, main { max-width: 1120px; margin: 0 auto; padding: 24px; }
+    header { padding-top: 32px; }
+    h1, h2, h3 { margin: 0; line-height: 1.2; }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.25rem; margin-bottom: 12px; }
+    h3 { font-size: 1rem; margin-bottom: 8px; }
+    p { margin: 8px 0 0; color: var(--muted); }
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      margin: 16px 0;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .value { display: block; margin-top: 4px; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th, td { border-bottom: 1px solid var(--line); padding: 10px; text-align: left; vertical-align: top; }
+    th { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: #eef2f7;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .parallel { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 35%, var(--line)); }
+    .sequential { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 35%, var(--line)); }
+    .blocked { color: var(--risk); border-color: color-mix(in srgb, var(--risk) 35%, var(--line)); }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    ul { margin: 8px 0 0 18px; padding: 0; }
+    li { margin: 6px 0; }
+    .diagram {
+      width: 100%;
+      min-height: 180px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+    }
+    @media (max-width: 760px) {
+      header, main { padding: 16px; }
+      .summary, .grid { grid-template-columns: 1fr; }
+      table { display: block; overflow-x: auto; white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="label">Agent Flow</span>
+    <h1>PR Breakdown And Worktree Contract</h1>
+    <p>Replace placeholders with the plan-specific slices, dependency graph, branch/worktree matrix, validation gates, and bypass decision.</p>
+    <div class="summary" aria-label="Summary">
+      <div class="metric"><span class="label">Default</span><span class="value">Small readable PRs</span></div>
+      <div class="metric"><span class="label">Max Slice</span><span class="value">300 meaningful lines</span></div>
+      <div class="metric"><span class="label">Parallelism</span><span class="value">Only independent slices</span></div>
+      <div class="metric"><span class="label">Bypass</span><span class="value">User-approved only</span></div>
+    </div>
+  </header>
+  <main>
+    <section>
+      <h2>Contract</h2>
+      <div class="grid">
+        <article>
+          <h3>Default Split Rules</h3>
+          <ul>
+            <li>One responsibility and one reviewer mental model per PR.</li>
+            <li>Each PR is independently reviewable, buildable, testable, and deployable.</li>
+            <li>No PR depends on code that is only promised in a later PR.</li>
+            <li>Generated files and tests are excluded from size estimates but included in validation.</li>
+          </ul>
+        </article>
+        <article>
+          <h3>Bypass Rules</h3>
+          <ul>
+            <li>Record the user-approved reason for a coarse or single-PR path.</li>
+            <li>Call out residual review risk and validation implications.</li>
+            <li>Keep a fallback split ready if the implementation grows.</li>
+            <li>Never use bypass to hide missing decisions or unclear scope.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>PR Slice Matrix</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>PR</th>
+            <th>Purpose</th>
+            <th>Dependencies</th>
+            <th>Base Repo</th>
+            <th>Base Branch</th>
+            <th>Worktree</th>
+            <th>Setup</th>
+            <th>Validation</th>
+            <th>Mode</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>PR 1</td>
+            <td>Foundation or contract change</td>
+            <td>None</td>
+            <td><code>/Users/.../worktrees/repo.git</code></td>
+            <td><code>main</code></td>
+            <td><code>../repo-feature-pr-1</code></td>
+            <td><code>cd /Users/.../worktrees/repo.git &amp;&amp; wt-feature feature-pr-1 main</code></td>
+            <td>Targeted unit/contract checks</td>
+            <td><span class="pill parallel">parallelizable</span></td>
+          </tr>
+          <tr>
+            <td>PR 2</td>
+            <td>Service or API behavior</td>
+            <td>PR 1</td>
+            <td><code>/Users/.../worktrees/repo.git</code></td>
+            <td><code>feature/pr-1</code></td>
+            <td><code>../repo-feature-pr-2</code></td>
+            <td><code>cd /Users/.../worktrees/repo.git &amp;&amp; wt-feature feature-pr-2 feature/pr-1</code></td>
+            <td>Runtime/API proof</td>
+            <td><span class="pill sequential">sequential</span></td>
+          </tr>
+          <tr>
+            <td>PR 3</td>
+            <td>UI integration or final wiring</td>
+            <td>PR 2</td>
+            <td><code>/Users/.../worktrees/repo.git</code></td>
+            <td><code>feature/pr-2</code></td>
+            <td><code>../repo-feature-pr-3</code></td>
+            <td><code>cd /Users/.../worktrees/repo.git &amp;&amp; wt-feature feature-pr-3 feature/pr-2</code></td>
+            <td>Browser/manual proof</td>
+            <td><span class="pill sequential">sequential</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Dependency Graph</h2>
+      <svg class="diagram" viewBox="0 0 900 210" role="img" aria-label="PR dependency graph">
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#64748b"></path>
+          </marker>
+        </defs>
+        <line x1="210" y1="105" x2="350" y2="105" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"></line>
+        <line x1="510" y1="105" x2="650" y2="105" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"></line>
+        <rect x="55" y="70" width="155" height="70" rx="8" fill="#ffffff" stroke="#d8dee8"></rect>
+        <rect x="355" y="70" width="155" height="70" rx="8" fill="#ffffff" stroke="#d8dee8"></rect>
+        <rect x="655" y="70" width="155" height="70" rx="8" fill="#ffffff" stroke="#d8dee8"></rect>
+        <text x="132" y="100" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2933">PR 1</text>
+        <text x="132" y="123" text-anchor="middle" font-size="13" fill="#64748b">Foundation</text>
+        <text x="432" y="100" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2933">PR 2</text>
+        <text x="432" y="123" text-anchor="middle" font-size="13" fill="#64748b">Behavior</text>
+        <text x="732" y="100" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2933">PR 3</text>
+        <text x="732" y="123" text-anchor="middle" font-size="13" fill="#64748b">Integration</text>
+      </svg>
+    </section>
+
+    <section>
+      <h2>Stop Conditions</h2>
+      <ul>
+        <li>A slice cannot compile, test, or deploy independently.</li>
+        <li>A required product, architecture, validation, rollout, or scope decision is missing.</li>
+        <li>The implementation touches files outside the selected slice scope.</li>
+        <li>The coarse/single-PR path grows beyond the approved review risk.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>
