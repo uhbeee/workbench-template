@@ -4,65 +4,116 @@
 
 export WORKTREE_ROOT="$HOME/Developer/worktrees"
 export WORKTREE_SCRIPTS="$(cd "$(dirname "${(%):-%x}")" && pwd)"
+export WORKBENCH_ROOT="${WORKBENCH_ROOT:-$(cd "$WORKTREE_SCRIPTS/../.." && pwd)}"
+
+_wt_python() {
+    if command -v python3 >/dev/null 2>&1; then
+        echo python3
+    else
+        echo python
+    fi
+}
+
+_wt_run_python() {
+    local script="$1"
+    shift
+    "$(_wt_python)" "$WORKBENCH_ROOT/scripts/worktrees/$script" "$@"
+}
 
 # ============================================================
-# Core Commands (delegate to scripts)
+# Core Commands
 # ============================================================
 
-wt-migrate()  { bash "$WORKTREE_SCRIPTS/wt-migrate.sh" "$@"; }
-wt-status()   { bash "$WORKTREE_SCRIPTS/wt-status.sh" "$@"; }
-wt-cleanup()  { bash "$WORKTREE_SCRIPTS/wt-cleanup.sh" "$@"; }
+wt-migrate()  { _wt_run_python wt_migrate.py "$@"; }
+wt-status()   { _wt_run_python wt_status.py "$@"; }
+wt-cleanup()  { _wt_run_python wt_cleanup.py "$@"; }
 
 wt-feature() {
-    bash "$WORKTREE_SCRIPTS/wt-feature.sh" "$@"
-    if [[ $? -eq 0 && -n "$1" ]]; then
-        local repo_root=$(git rev-parse --git-common-dir 2>/dev/null || git rev-parse --git-dir 2>/dev/null)
-        local dir_name="${1##*/}"
-        [[ -d "$repo_root/_feature/$dir_name" ]] && cd "$repo_root/_feature/$dir_name"
+    local output rc worktree_path
+    output="$(_wt_run_python wt_feature.py --workdir "$PWD" "$@" 2>&1)"
+    rc=$?
+    print -r -- "$output"
+    if [[ $rc -eq 0 ]]; then
+        worktree_path=$(print -r -- "$output" | awk -F= '/^WORKTREE_PATH=/{print $2; exit}')
+        [[ -n "$worktree_path" && -d "$worktree_path" ]] && cd "$worktree_path"
     fi
+    return $rc
 }
 
 wt-review() {
-    bash "$WORKTREE_SCRIPTS/wt-review.sh" "$@"
-    if [[ $? -eq 0 ]]; then
-        local repo_root=$(git rev-parse --git-common-dir 2>/dev/null || git rev-parse --git-dir 2>/dev/null)
-        [[ -d "$repo_root/_review/current" ]] && cd "$repo_root/_review/current"
+    local output rc worktree_path
+    output="$(_wt_run_python wt_review.py --workdir "$PWD" "$@" 2>&1)"
+    rc=$?
+    print -r -- "$output"
+    if [[ $rc -eq 0 ]]; then
+        worktree_path=$(print -r -- "$output" | awk -F= '/^WORKTREE_PATH=/{print $2; exit}')
+        [[ -n "$worktree_path" && -d "$worktree_path" ]] && cd "$worktree_path"
     fi
+    return $rc
 }
 
-wt-review-done() { bash "$WORKTREE_SCRIPTS/wt-review-done.sh" "$@"; }
+wt-review-done() { _wt_run_python wt_review_done.py --workdir "$PWD" "$@"; }
 
 wt-hotfix() {
-    bash "$WORKTREE_SCRIPTS/wt-hotfix.sh" "$@"
-    if [[ $? -eq 0 && -n "$1" ]]; then
-        local repo_root=$(git rev-parse --git-common-dir 2>/dev/null || git rev-parse --git-dir 2>/dev/null)
-        [[ -d "$repo_root/_hotfix/$1" ]] && cd "$repo_root/_hotfix/$1"
+    local output rc worktree_path
+    output="$(_wt_run_python wt_hotfix.py --workdir "$PWD" "$@" 2>&1)"
+    rc=$?
+    print -r -- "$output"
+    if [[ $rc -eq 0 ]]; then
+        worktree_path=$(print -r -- "$output" | awk -F= '/^WORKTREE_PATH=/{print $2; exit}')
+        [[ -n "$worktree_path" && -d "$worktree_path" ]] && cd "$worktree_path"
     fi
+    return $rc
 }
 
-wt-hotfix-done() { bash "$WORKTREE_SCRIPTS/wt-hotfix-done.sh" "$@"; }
+wt-hotfix-done() { _wt_run_python wt_hotfix_done.py --workdir "$PWD" "$@"; }
+
+# wt-test — source the repo's bare-root .env (durable live-test creds) into the
+# SAME shell, then run the given command. Fixes the "live gates silently skip
+# because conftest doesn't load .env" trap. Usage:
+#   wt-test uv run pytest -m integration_dev path/to/test.py
+wt-test() {
+    local common envf
+    common="$(git rev-parse --git-common-dir 2>/dev/null)" || { echo "wt-test: not in a git repo" >&2; return 1; }
+    [[ "$common" = /* ]] || common="$PWD/$common"
+    envf="$common/.env"
+    if [[ -f "$envf" ]]; then
+        set -a; source "$envf"; set +a
+        echo "wt-test: sourced $envf" >&2
+    else
+        echo "wt-test: no .env at $envf — running without it (live gates may skip)" >&2
+    fi
+    [[ $# -gt 0 ]] || { echo "wt-test: pass a command, e.g. wt-test uv run pytest ..." >&2; return 2; }
+    "$@"
+}
 
 wt-remove() {
-    bash "$WORKTREE_SCRIPTS/wt-remove.sh" "$@"
+    local repo_root rc
+    repo_root=$(git rev-parse --git-common-dir 2>/dev/null || git rev-parse --git-dir 2>/dev/null || echo "$WORKTREE_ROOT")
+    _wt_run_python wt_remove.py --workdir "$PWD" "$@"
+    rc=$?
     # cd to repo root if current dir was deleted
-    [[ ! -d "$(pwd)" ]] && cd "$(git rev-parse --git-common-dir 2>/dev/null || echo "$WORKTREE_ROOT")"
+    [[ $rc -eq 0 && ! -d "$PWD" ]] && cd "$repo_root"
+    return $rc
 }
 
-wt-sync() { bash "$WORKTREE_SCRIPTS/wt-sync.sh" "$@"; }
+wt-sync() { _wt_run_python wt_sync.py --workdir "$PWD" "$@"; }
 
-wt-release() { bash "$WORKTREE_SCRIPTS/wt-release.sh" "$@"; }
+wt-release() { _wt_run_python wt_release.py --workdir "$PWD" "$@"; }
 
 wt-hotfix-pr() {
-    bash "$WORKTREE_SCRIPTS/wt-hotfix-pr.sh" "$@"
-    if [[ $? -eq 0 && -f /tmp/.wt-hotfix-pr-last-dir ]]; then
-        local repo_root=$(git rev-parse --git-common-dir 2>/dev/null || git rev-parse --git-dir 2>/dev/null)
-        local wt_dir=$(cat /tmp/.wt-hotfix-pr-last-dir)
-        rm -f /tmp/.wt-hotfix-pr-last-dir
-        [[ -d "$repo_root/$wt_dir" ]] && cd "$repo_root/$wt_dir"
+    local output rc worktree_path
+    output="$(_wt_run_python wt_hotfix_pr.py --workdir "$PWD" "$@" 2>&1)"
+    rc=$?
+    print -r -- "$output"
+    if [[ $rc -eq 0 ]]; then
+        worktree_path=$(print -r -- "$output" | awk -F= '/^WORKTREE_PATH=/{print $2; exit}')
+        [[ -n "$worktree_path" && -d "$worktree_path" ]] && cd "$worktree_path"
     fi
+    return $rc
 }
 
-wt-sync-permissions() { bash "$WORKTREE_SCRIPTS/wt-sync-permissions.sh" "$@"; }
+wt-sync-permissions() { _wt_run_python wt_sync_permissions.py --workdir "$PWD" "$@"; }
 
 # ============================================================
 # Navigation
@@ -220,7 +271,9 @@ _wt_repos() {
     compadd -a repos
 }
 
-compdef _wt_repos wtr wtd wtm wt-status
+if (( $+functions[compdef] )); then
+    compdef _wt_repos wtr wtd wtm wt-status
+fi
 
 # Worktree name completion (for wt-remove, wt-hotfix-done)
 _wt_remove() {
@@ -256,7 +309,9 @@ _wt_remove() {
     compadd -a names
 }
 
-compdef _wt_remove wt-remove wtrm wt-hotfix-done
+if (( $+functions[compdef] )); then
+    compdef _wt_remove wt-remove wtrm wt-hotfix-done
+fi
 
 # wtn completion (flags only since it's interactive)
 _wtn() {
@@ -272,7 +327,9 @@ _wtn() {
     fi
 }
 
-compdef _wtn wtn wtg wtc wtcd
+if (( $+functions[compdef] )); then
+    compdef _wtn wtn wtg wtc wtcd
+fi
 
 # Silenced to avoid p10k instant prompt warning
 # To check: run `wt-status` or `wtr` to list repos

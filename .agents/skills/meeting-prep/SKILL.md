@@ -1,7 +1,8 @@
 ---
 name: meeting-prep
 description: Gather context for an upcoming meeting from Jira, Confluence, and Slack. Produces a brief with background, open questions, and talking points.
-argument-hint: <meeting topic>
+metadata:
+  workbench.argument-hint: "<meeting topic>"
 ---
 
 # Meeting Prep
@@ -33,6 +34,8 @@ Based on the meeting topic, search across all available sources:
 Pull together everything found into a coherent brief. Connect the dots between Jira tickets, design docs, and Slack discussions.
 
 ### Step 3: Present the Brief
+
+If the brief is saved, shared, or longer than a quick chat answer, read `context/standards/html-plan-standard.md` and create `meeting-brief.md` as the primary artifact (text-heavy briefs are Markdown-first per the standard). Generate a `meeting-brief.html` companion only when the brief carries genuine visual content — an agenda diagram, a decision matrix with semantic colors, side-by-side mockups for design reviews.
 
 ```
 ## Meeting Brief: [Topic]

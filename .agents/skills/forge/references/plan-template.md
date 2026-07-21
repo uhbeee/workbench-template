@@ -1,62 +1,25 @@
-# Plan: [Feature Name]
+# HTML Plan Template Notes
 
-**Version**: [N]
-**Date**: YYYY-MM-DD
-**Depth**: [quick|standard|deep]
-**Iterations**: [N] research passes, [N] challenge passes, [N] loop-backs
+Forge plans are HTML-first.
 
-## Overview
+Primary artifact:
+- `context/plans/active/<plan-name>/plan.html`
 
-[2-3 sentences: what this feature does, why it matters, who it's for]
+Compatibility artifact:
+- `context/plans/active/<plan-name>/plan.md`
+- Keep this to a short synopsis and link to `plan.html`.
 
-## Success Criteria
+Before generating `plan.html`, read:
+- `context/standards/html-plan-standard.md`
 
-- [ ] [Concrete, measurable outcome 1]
-- [ ] [Concrete, measurable outcome 2]
-- [ ] [Concrete, measurable outcome 3]
+For PR breakdowns, follow the implementation-plan pattern:
+- top summary strip,
+- milestone timeline,
+- data/service flow SVG,
+- optional mockups when UI behavior changes,
+- key code or contract snippets for risky areas,
+- risk and mitigation table,
+- open questions with owners/deadlines,
+- reviewer focus.
 
-## Decisions Locked In
-
-| # | Topic | Decision | Rationale | Phase |
-|---|-------|----------|-----------|-------|
-| 1 | ... | ... | ... | intake/refine/create |
-
-## Scope
-
-### In Scope
-- [Item 1]
-- [Item 2]
-
-### Out of Scope
-- [Item 1 — and why]
-- [Item 2 — and why]
-
-### Stretch (not committed)
-- [Item 1]
-
-## Risk Assessment
-
-| Risk | Severity | Likelihood | Mitigation |
-|------|----------|-----------|------------|
-| [From analysis.md] | high/med/low | high/med/low | [How addressed in plan] |
-
-## Work Breakdown
-
-### PR 1: [Title] [est: Xh]
-- [Task 1]
-- [Task 2]
-- **Dependencies**: [none | PR N]
-- **Verification**: [How to know it's done]
-
-### PR 2: [Title] [est: Xh]
-...
-
-## Implementation Order
-
-1. PR [N] — [why first]
-2. PR [N] — [dependency on previous]
-...
-
-## Open Questions
-
-- [Anything unresolved — flagged for implementation to discover]
+The full implementation plan content belongs in `plan.html`, not `plan.md`.

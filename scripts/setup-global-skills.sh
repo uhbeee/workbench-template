@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
-# Symlink portable workbench skills to ~/.claude/skills/
-# so they're available in every Claude Code project.
+# Symlink portable workbench skills to global AI-tool skill directories
+# so they're available in every Claude Code and Codex project.
 #
 # Reads from skills-global.yaml (committed), falling back to
 # config.yaml skills.global (legacy/gitignored).
@@ -15,52 +15,117 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 SKILLS_SRC="$REPO_ROOT/.agents/skills"
-SKILLS_DST="$HOME/.claude/skills"
+SKILL_TARGET_DIRS=(
+  "$HOME/.claude/skills"
+  "$HOME/.codex/skills"
+)
+SKILL_TARGET_LABELS=(
+  "Claude Code"
+  "Codex"
+)
 
-SKILLS=()
-while IFS= read -r line; do
-  [[ -n "$line" ]] && SKILLS+=("$line")
-done < <(parse_global_skills 2>/dev/null)
+mapfile -t SKILLS < <(parse_global_skills 2>/dev/null)
 
 if [[ ${#SKILLS[@]} -eq 0 ]]; then
   echo "No global skills configured (check skills-global.yaml or config.yaml skills.global)."
   exit 0
 fi
 
-mkdir -p "$SKILLS_DST"
+echo "Workbench skill script links:"
+ensure_worktree_skill_script_links
+echo ""
 
-created=0
-skipped=0
-missing=0
+total_created=0
+total_skipped=0
+total_missing=0
+total_pruned=0
 
+declare -A CONFIGURED_SKILLS=()
 for skill in "${SKILLS[@]}"; do
-  src="$SKILLS_SRC/$skill"
-  dst="$SKILLS_DST/$skill"
-
-  if [[ ! -d "$src" ]]; then
-    echo "  MISSING  $skill (not found in .agents/skills/)"
-    missing=$((missing + 1))
-    continue
-  fi
-
-  if is_link "$dst"; then
-    echo "  OK       $skill (already linked)"
-    skipped=$((skipped + 1))
-    continue
-  elif [[ -e "$dst" ]]; then
-    echo "  SKIP     $skill (non-link already exists at $dst)"
-    skipped=$((skipped + 1))
-    continue
-  fi
-
-  if create_dir_link "$src" "$dst"; then
-    echo "  LINKED   $skill"
-    created=$((created + 1))
-  else
-    echo "  FAILED   $skill (could not create link)"
-    missing=$((missing + 1))
-  fi
+  CONFIGURED_SKILLS["$skill"]=1
 done
 
-echo ""
-echo "Done: $created linked, $skipped unchanged, $missing missing"
+prune_stale_workbench_skill_links() {
+  local skills_dst="$1"
+  local pruned=0
+
+  shopt -s nullglob
+  for dst in "$skills_dst"/*; do
+    local skill_name target
+    skill_name="$(basename "$dst")"
+
+    if [[ -n "${CONFIGURED_SKILLS[$skill_name]:-}" ]]; then
+      continue
+    fi
+    if ! is_link "$dst"; then
+      continue
+    fi
+
+    target="$(link_target "$dst")"
+    if [[ "$target" == "$SKILLS_SRC/"* ]]; then
+      remove_link "$dst"
+      echo "  PRUNED   $skill_name (removed stale Workbench skill link)"
+      pruned=$((pruned + 1))
+    fi
+  done
+  shopt -u nullglob
+
+  return "$pruned"
+}
+
+for i in "${!SKILL_TARGET_DIRS[@]}"; do
+  skills_dst="${SKILL_TARGET_DIRS[$i]}"
+  label="${SKILL_TARGET_LABELS[$i]}"
+
+  mkdir -p "$skills_dst"
+
+  created=0
+  skipped=0
+  missing=0
+  pruned=0
+
+  echo "$label global skills:"
+  prune_stale_workbench_skill_links "$skills_dst" || pruned=$?
+  for skill in "${SKILLS[@]}"; do
+    src="$SKILLS_SRC/$skill"
+    dst="$skills_dst/$skill"
+
+    if [[ ! -d "$src" ]]; then
+      echo "  MISSING  $skill (not found in .agents/skills/)"
+      missing=$((missing + 1))
+      continue
+    fi
+
+    if is_link "$dst"; then
+      if [[ -d "$dst" ]]; then
+        echo "  OK       $skill (already linked)"
+        skipped=$((skipped + 1))
+        continue
+      fi
+
+      remove_link "$dst"
+    elif [[ -e "$dst" ]]; then
+      echo "  SKIP     $skill (non-link already exists at $dst)"
+      skipped=$((skipped + 1))
+      continue
+    fi
+
+    if create_dir_link "$src" "$dst"; then
+      echo "  LINKED   $skill"
+      created=$((created + 1))
+    else
+      echo "  FAILED   $skill (could not create link)"
+      missing=$((missing + 1))
+    fi
+  done
+
+  echo "  Done: $created linked, $skipped unchanged, $missing missing, $pruned pruned"
+  echo ""
+
+  total_created=$((total_created + created))
+  total_skipped=$((total_skipped + skipped))
+  total_missing=$((total_missing + missing))
+  total_pruned=$((total_pruned + pruned))
+done
+
+echo "All done: $total_created linked, $total_skipped unchanged, $total_missing missing, $total_pruned pruned"

@@ -1,0 +1,17 @@
+{
+  "skill_name": "worktree-migrate",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Migrate https://github.com/example-org/example.git into the managed worktree layout.",
+      "expected_output": "Runs scripts/wt_migrate.py --from-url https://github.com/example-org/example.git as a dry-run first, reports SOURCE, REPO_NAME, TARGET_BASE_REPO, and the confirmed Python migration path, and only executes migration after explicit approval.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Add my existing local repo C:/Repos/backend to worktrees as backend.",
+      "expected_output": "Uses the cross-platform scripts/wt_migrate.py --from-dir C:/Repos/backend backend flow, dry-runs first, reports that the original repo is not deleted or modified, and on Windows calls the same canonical Python migration implementation after confirmation.",
+      "files": []
+    }
+  ]
+}

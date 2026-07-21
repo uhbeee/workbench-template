@@ -1,7 +1,8 @@
 ---
 name: slack-catch-up
 description: Scan Slack channels, DMs, and @mentions to surface what needs attention. Filters noise, prioritizes by urgency. Use after being away or to catch up mid-day.
-argument-hint: [channels] [time-window]
+metadata:
+  workbench.argument-hint: "[channels] [time-window]"
 ---
 
 # Slack Catch-up

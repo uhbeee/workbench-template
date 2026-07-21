@@ -2,6 +2,8 @@
 
 > This prompt contains the strategic context for implementing [feature name]. It was produced in the command-center workspace after research, critical analysis, and planning. Paste this into a Claude Code session in the target repo to begin implementation.
 
+**Plan artifact**: `[COMMAND_CENTER_PATH]/context/plans/active/[PLAN_NAME]/plan.html`
+
 ## Strategic Context
 
 **What**: [1-2 sentences — what are we building]
@@ -29,7 +31,7 @@
 
 | # | PR Scope | Dependencies | Size |
 |---|----------|--------------|------|
-| 1 | [What this PR does] | None | S/M/L |
+| 1 | [What this PR does; mirror the PR timeline in plan.html] | None | S/M/L |
 | 2 | [What this PR does] | PR 1 | S/M/L |
 
 ## Decisions Locked In
@@ -68,7 +70,7 @@ As you implement, track progress in the command center so that future sessions c
 
 Create it with these sections:
 1. **Summary** — plan name, target repo, command center path, dates, overall status
-2. **Progress Overview** — step-status table (copy steps from the plan's implementation order)
+2. **Progress Overview** — step-status table (copy steps from the plan.html PR breakdown timeline)
 3. **Active Blockers** — table with ID, severity, blocked steps, identified date, description
 4. **Iteration Summary** — brief narrative of how the plan evolved during implementation
 5. **Decision Changelog** — append-only table (DC-001, DC-002...) with: step, original decision, revised decision, rationale. Later reversals get new entries referencing the original.
@@ -83,4 +85,4 @@ Create it with these sections:
 
 ## Suggested Next Step
 
-Run `/plan-create` in this repo to create an implementation-level plan with PR breakdown, or start exploring the codebase to answer the open technical questions above.
+Open `plan.html`, then start exploring the codebase to answer the open technical questions above.

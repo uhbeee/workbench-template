@@ -3,7 +3,7 @@ name: quarterly-goals
 description: Track quarterly goals across teams. Set up new goals, add mid-quarter priorities, run weekly goal checks, and assess capacity impact of scope changes.
 ---
 
-> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
+> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.codex/workbench-root` or `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
 
 # Quarterly Goals Tracker
 
@@ -35,6 +35,8 @@ For each team in `config.yaml: teams[]`:
 Before creating a new goals file, check if `context/active/goals.md` exists from a previous quarter. If so, archive it to `context/archive/YYYY/QN/goals.md`.
 
 Then write to `context/active/goals.md` with sections for: Original Goals (per team), Mid-Quarter Additions, Capacity Budget, Scope Change Log, Monthly Milestones, Weekly Goal Connection, and Unconnected Work Log.
+
+Keep `goals.md` as the automation source of truth. If the goals plan is meant to be reviewed, shared, or presented, also create/update `context/active/goals.html` using `context/standards/html-plan-standard.md` as a companion view.
 
 ### Adding a Mid-Quarter Goal
 

@@ -10,6 +10,6 @@ Read and apply the full methodology from `.agents/skills/research/SKILL.md`.
    - Standard: full internal (Confluence, Jira, Slack) + 5-8 web
    - Deep: all internal + 8-12 web, multiple search angles
 3. **Scoped by constraints** — skip options the user already ruled out in INTAKE. Don't research technologies the user said cannot change.
-4. **Output location** — write `research.md` to `context/plans/active/<plan-name>/`, not `context/notes/research/`.
+4. **Output location** — write `research.html` to `context/plans/active/<plan-name>/`, not `context/notes/research/`. Create `research.md` only as a short compatibility synopsis when needed.
 5. **Present findings before decisions** — show the executive summary BEFORE asking the user anything. This was the #1 friction point in prior sessions.
 6. **If brainstorm ran** — research should focus on the selected approach, not all brainstormed alternatives. The rejected approaches are documented in state.md for reference.

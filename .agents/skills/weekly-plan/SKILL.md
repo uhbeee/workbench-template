@@ -3,7 +3,7 @@ name: weekly-plan
 description: Create and maintain a realistic weekly capacity plan. Tracks actuals vs estimates, checks if new tasks fit, and manages the weekly cycle. Run Monday mornings.
 ---
 
-> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
+> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.codex/workbench-root` or `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
 
 # Weekly Plan
 
@@ -95,7 +95,9 @@ Before creating the new plan:
 2. If so, archive it to `context/archive/YYYY/MM/weekly/YYYY-WNN.md` (creating directories as needed).
 3. Also archive `context/active/calendar.md` to `context/archive/YYYY/MM/calendar/YYYY-WNN.md` if it's from last week.
 
-Then write to `context/active/weekly.md` using the format defined in CLAUDE.md.
+Then write to `context/active/weekly.md` using the format defined in CLAUDE.md. Keep this Markdown file as the automation source of truth.
+
+If the weekly plan is meant to be reviewed or shared, also create/update `context/active/weekly.html` using `context/standards/html-plan-standard.md` as a companion view. Do not replace `weekly.md`.
 
 ### Answering "Can I Fit This In?"
 

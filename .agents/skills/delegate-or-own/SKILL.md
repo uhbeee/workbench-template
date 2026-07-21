@@ -1,7 +1,8 @@
 ---
 name: delegate-or-own
 description: Decide whether to own a task or delegate it. Assesses principal-level requirement, complexity, and growth opportunity. Generates handoff briefs for delegation.
-argument-hint: <task description>
+metadata:
+  workbench.argument-hint: "<task description>"
 ---
 
 # Delegate or Own
@@ -54,6 +55,8 @@ Present: recommendation, reason, time comparison (handoff effort vs doing it you
 ### Step 3: If Delegating — Prepare the Handoff
 
 Create a structured handoff brief with: what needs to be done, context (Jira/design docs), approach suggestion, key files/entry points, gotchas, definition of done, and topics to ask about.
+
+If the handoff brief is saved or shared as a standalone artifact, read `context/standards/html-plan-standard.md` and create `handoff-brief.html` as the primary artifact. Use Slack/email Markdown only as a paste-format companion.
 
 Offer to send via Slack after approval.
 

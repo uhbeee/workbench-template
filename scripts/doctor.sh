@@ -65,22 +65,80 @@ else
 fi
 
 # Check global skills
-SKILLS_DST="$HOME/.claude/skills"
-if [[ -d "$SKILLS_DST" ]]; then
-  broken=0
-  for skill_link in "$SKILLS_DST"/*/; do
-    [[ -d "$skill_link" ]] || continue
-    if is_link "${skill_link%/}" && [[ ! -d "$skill_link" ]]; then
-      check_fail "Global skill $(basename "$skill_link") — broken link"
+check_global_skill_dir() {
+  local label="$1"
+  local skills_dst="$2"
+
+  if [[ ! -d "$skills_dst" ]]; then
+    check_warn "$label global skills directory does not exist: $skills_dst (run setup.sh)"
+    return
+  fi
+
+  local broken=0
+  local missing=0
+
+  while IFS= read -r skill; do
+    [[ -z "$skill" ]] && continue
+    [[ -d "$REPO_ROOT/.agents/skills/$skill" ]] || continue
+
+    local skill_link="$skills_dst/$skill"
+    if [[ ! -e "$skill_link" && ! -L "$skill_link" ]]; then
+      check_warn "$label global skill missing: $skill (run setup.sh)"
+      missing=$((missing + 1))
+    elif is_link "$skill_link" && [[ ! -d "$skill_link" ]]; then
+      check_fail "$label global skill $skill — broken link"
       broken=$((broken + 1))
     fi
-  done
-  if [[ $broken -eq 0 ]]; then
-    check_pass "Global skills — no broken links"
+  done < <(parse_global_skills 2>/dev/null || true)
+
+  if [[ $broken -eq 0 && $missing -eq 0 ]]; then
+    check_pass "$label global skills — configured links present"
+  elif [[ $broken -eq 0 ]]; then
+    check_pass "$label global skills — no broken links"
   fi
-else
-  check_warn "~/.claude/skills/ does not exist (run setup.sh to create global skills)"
+}
+
+check_global_skill_dir "Claude Code" "$HOME/.claude/skills"
+check_global_skill_dir "Codex" "$HOME/.codex/skills"
+
+# Check skill-local scripts links used by worktree skills.
+worktree_scripts_target="$REPO_ROOT/scripts/worktrees"
+worktree_script_link_failures=0
+
+while IFS= read -r skill; do
+  [[ -n "$skill" ]] || continue
+
+  skill_dir="$REPO_ROOT/.agents/skills/$skill"
+  skill_scripts="$skill_dir/scripts"
+
+  if [[ ! -d "$skill_dir" ]]; then
+    check_fail "$skill missing (required for worktree skill script link)"
+    worktree_script_link_failures=$((worktree_script_link_failures + 1))
+  elif ! is_link "$skill_scripts"; then
+    check_fail "$skill/scripts is not a link to scripts/worktrees (run setup.sh)"
+    worktree_script_link_failures=$((worktree_script_link_failures + 1))
+  elif same_physical_dir "$skill_scripts" "$worktree_scripts_target"; then
+    check_pass "$skill/scripts → scripts/worktrees"
+  else
+    check_fail "$skill/scripts link target is wrong or missing (run setup.sh)"
+    worktree_script_link_failures=$((worktree_script_link_failures + 1))
+  fi
+done < <(worktree_skill_script_link_skills)
+
+if [[ $worktree_script_link_failures -eq 0 ]]; then
+  check_pass "Workbench worktree skill script links are valid"
 fi
+
+# Check workbench root pointers used by global skills.
+for pointer in "$HOME/.claude/workbench-root" "$HOME/.codex/workbench-root"; do
+  if [[ ! -f "$pointer" ]]; then
+    check_warn "$pointer missing (run setup.sh)"
+  elif [[ "$(cat "$pointer")" == "$REPO_ROOT" ]]; then
+    check_pass "$pointer points to this workbench"
+  else
+    check_warn "$pointer points elsewhere: $(cat "$pointer")"
+  fi
+done
 
 # ─── 3. Worktrees ─────────────────────────────────────────────────────────
 header "Worktrees"

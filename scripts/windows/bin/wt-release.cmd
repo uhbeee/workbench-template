@@ -1,10 +1,7 @@
 @echo off
-setlocal enabledelayedexpansion
-call "%~dp0wt-config.cmd"
-set "ORIG_DIR=%CD%"
-set "ORIG_DIR=!ORIG_DIR:\=/!"
-set "ORIG_DIR=!ORIG_DIR:C:/=/c/!"
-set "ORIG_DIR=!ORIG_DIR:D:/=/d/!"
-
-"%GIT_BASH%" "%SCRIPTS_PATH%/wt-release.sh" %* --workdir "!ORIG_DIR!"
-endlocal
+call "%~dp0wt-config.cmd" 2>nul
+if "%WORKBENCH_ROOT%"=="" (
+  for %%I in ("%~dp0..\..\..") do set "WORKBENCH_ROOT=%%~fI"
+)
+if "%PYTHON_BIN%"=="" set "PYTHON_BIN=python"
+"%PYTHON_BIN%" "%WORKBENCH_ROOT%\scripts\worktrees\wt_release.py" --workdir "%CD%" %*

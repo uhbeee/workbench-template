@@ -15,13 +15,13 @@ include:
   - .agents/skills/confluence-review/
   - .agents/skills/cut-release/
   - .agents/skills/daily-checkin/
-  - .agents/skills/database-design/
+  - .agents/skills/db-design-interview/
   - .agents/skills/delegate-or-own/
   - .agents/skills/doctor/
   - .agents/skills/draft-reply/
   - .agents/skills/end-of-day/
   - .agents/skills/estimate/
-  - .agents/skills/feature-worktree-create/
+  - .agents/skills/worktree-feature-create/
   - .agents/skills/hotfix/
   - .agents/skills/interrupt/
   - .agents/skills/jira-review/
@@ -30,8 +30,8 @@ include:
   - .agents/skills/meeting-prep/
   - .agents/skills/morning-triage/
   - .agents/skills/add-skill/
+  - .agents/skills/agent-flow/
   - .agents/skills/brainstorm/
-  - .agents/skills/debug-appinsights/
   - .agents/skills/forge/
   - .agents/skills/implement/
   - .agents/skills/plan-create/
@@ -57,6 +57,10 @@ include:
   - .agents/skills/weekly-plan/
   - .agents/skills/weekly-retro/
   - .agents/skills/what-next/
+  - .agents/skills/worktree-migrate/
+  - .agents/skills/worktree-remove/
+  - .agents/skills/worktree-review-create/
+  - .agents/skills/worktree-sync/
   - .agents/skills/worktrees/
   - .agents/skills/wrap-up/
 
@@ -71,6 +75,7 @@ include:
   - scripts/template-allowlist.yaml
   - scripts/windows/
   - scripts/mac/
+  - scripts/worktrees/
   # NOTE: scripts/appinsights/ intentionally ABSENT (company-specific)
 
   # --- Other ---
@@ -78,6 +83,7 @@ include:
   - templates/
   - config.example.yaml
   - context/calibration.example.md
+  - skills-global.yaml
   - AGENTS.md
   - README.md
   - .gitignore

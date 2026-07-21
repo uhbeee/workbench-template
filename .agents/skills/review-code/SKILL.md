@@ -1,10 +1,11 @@
 ---
 name: review-code
 description: Adaptive code review orchestrator — classifies diff and invokes structural, security, QA, test, and CodeRabbit sub-skills
-argument-hint: [--quick] [--security-only] [--no-security] [--qa-only] [--no-qa] [--no-cr] [--cr-rules <file>] [--cr-only]
+metadata:
+  workbench.argument-hint: "[--quick] [--security-only] [--no-security] [--qa-only] [--no-qa] [--no-cr] [--cr-rules <file>] [--cr-only]"
 ---
 
-> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
+> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.codex/workbench-root` or `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
 
 # /review-code — Adaptive Code Review
 
@@ -167,6 +168,8 @@ If not authenticated, tell the user to run `cr auth login` and stop.
 ### Step 5: Assemble Output
 
 Combine all sub-skill outputs into a unified report:
+
+If saving or handing the review to another engineer/agent, read `context/standards/html-plan-standard.md` and create `code-review.html` as the primary artifact with severity filters, source/diff anchors, and validation/test gaps. Use the Markdown structure below for inline chat output or PR comment paste format only.
 
 ```markdown
 ## /review-code Results

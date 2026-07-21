@@ -1,7 +1,8 @@
 ---
 name: confluence-review
 description: Read and critically summarize a Confluence document. Surfaces key decisions, gaps, open questions, and suggests review questions.
-argument-hint: <page title or URL>
+metadata:
+  workbench.argument-hint: "<page title or URL>"
 ---
 
 # Confluence Review
@@ -34,6 +35,8 @@ Fetch the page content. If it references child pages or linked pages essential t
 Use `mcp__claude_ai_Atlassian__getConfluencePageFooterComments` and `mcp__claude_ai_Atlassian__getConfluencePageInlineComments`. Comments often contain objections, clarifications, or decisions not reflected in the doc body.
 
 ### Step 4: Present the Summary
+
+If saving or sharing the review, read `context/standards/html-plan-standard.md` and create `confluence-review.md` as the primary artifact (review summaries are Markdown-first per the standard). Generate a `confluence-review.html` companion only when the review reproduces structural elements of the source page that lose meaning in MD (deeply nested diagrams, embedded interactive widgets).
 
 ```
 ## Document: "Title"

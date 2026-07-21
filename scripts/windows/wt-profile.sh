@@ -1,17 +1,34 @@
 #!/bin/bash
 # wt-profile.sh - Source this in your .bashrc or .zshrc
 # Add this line to your shell profile:
-#   source "C:/worktrees-SeekOut/workbench/scripts/windows/wt-profile.sh"
+#   source "C:/worktrees/workbench/scripts/windows/wt-profile.sh"
 
 # Load generated config if available, otherwise use defaults
 SCRIPT_DIR_PROFILE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$SCRIPT_DIR_PROFILE/wt-config.sh" ]; then
     source "$SCRIPT_DIR_PROFILE/wt-config.sh"
 else
-    export WORKTREE_ROOT="C:/worktrees-SeekOut"
+    export WORKTREE_ROOT="C:/worktrees"
     export WORKTREE_SCRIPTS="$SCRIPT_DIR_PROFILE"
     export WORKBENCH_ROOT="$(cd "$SCRIPT_DIR_PROFILE/../.." && pwd)"
 fi
+
+_wt_python() {
+    if command -v py >/dev/null 2>&1; then
+        echo "py -3"
+    elif command -v python >/dev/null 2>&1; then
+        echo python
+    else
+        echo python3
+    fi
+}
+
+_wt_run_python() {
+    local script="$1"
+    shift
+    # shellcheck disable=SC2046
+    $(_wt_python) "$WORKBENCH_ROOT/scripts/worktrees/$script" "$@"
+}
 
 # ============================================================
 # Core Worktree Functions
@@ -24,48 +41,59 @@ wt-init() {
 
 # Create a feature worktree
 wt-feature() {
-    bash "$WORKTREE_SCRIPTS/wt-feature.sh" "$@"
+    local output rc worktree_path
+    output="$(_wt_run_python wt_feature.py --workdir "$PWD" "$@" 2>&1)"
+    rc=$?
+    printf '%s\n' "$output"
     # Auto-cd to the new worktree
-    if [ $? -eq 0 ] && [ -n "$1" ]; then
-        local repo_root=$(git rev-parse --git-common-dir 2>/dev/null || git rev-parse --git-dir)
-        local dir_name=$(echo "$1" | sed 's|.*/||')
-        cd "$repo_root/_feature/$dir_name" 2>/dev/null || true
+    if [ "$rc" -eq 0 ]; then
+        worktree_path=$(printf '%s\n' "$output" | awk -F= '/^WORKTREE_PATH=/{print $2; exit}')
+        [ -n "$worktree_path" ] && [ -d "$worktree_path" ] && cd "$worktree_path" 2>/dev/null || true
     fi
+    return "$rc"
 }
 
 # Quick PR review
 wt-review() {
-    bash "$WORKTREE_SCRIPTS/wt-review.sh" "$@"
-    # Auto-cd to review worktree
-    if [ $? -eq 0 ]; then
-        local repo_root=$(git rev-parse --git-common-dir 2>/dev/null || git rev-parse --git-dir)
-        cd "$repo_root/_review/current" 2>/dev/null || true
+    local output rc worktree_path
+    output="$(_wt_run_python wt_review.py --workdir "$PWD" "$@" 2>&1)"
+    rc=$?
+    printf '%s\n' "$output"
+    if [ "$rc" -eq 0 ]; then
+        worktree_path=$(printf '%s\n' "$output" | awk -F= '/^WORKTREE_PATH=/{print $2; exit}')
+        [ -n "$worktree_path" ] && [ -d "$worktree_path" ] && cd "$worktree_path" 2>/dev/null || true
     fi
+    return "$rc"
 }
 
 # Done with review
 wt-review-done() {
-    bash "$WORKTREE_SCRIPTS/wt-review-done.sh" "$@"
+    _wt_run_python wt_review_done.py --workdir "$PWD" "$@"
 }
 
 # Status across all repos
 wt-status() {
-    bash "$WORKTREE_SCRIPTS/wt-status.sh" "$@"
+    _wt_run_python wt_status.py "$@"
 }
 
 # Cleanup stale worktrees
 wt-cleanup() {
-    bash "$WORKTREE_SCRIPTS/wt-cleanup.sh" "$@"
+    _wt_run_python wt_cleanup.py "$@"
 }
 
 # Migrate existing repo or clone from URL to worktree structure
 wt-migrate() {
-    bash "$WORKTREE_SCRIPTS/wt-migrate.sh" "$@"
+    _wt_run_python wt_migrate.py "$@"
 }
 
 # Remove a worktree
 wt-remove() {
-    bash "$WORKTREE_SCRIPTS/wt-remove.sh" "$@"
+    local repo_root rc
+    repo_root=$(git rev-parse --git-common-dir 2>/dev/null || git rev-parse --git-dir 2>/dev/null || echo "$WORKTREE_ROOT")
+    _wt_run_python wt_remove.py --workdir "$PWD" "$@"
+    rc=$?
+    [ "$rc" -eq 0 ] && [ ! -d "$PWD" ] && cd "$repo_root" 2>/dev/null || true
+    return "$rc"
 }
 
 # ============================================================
@@ -168,36 +196,45 @@ wtn() {
 
 # Create a release branch
 wt-release() {
-    bash "$WORKTREE_SCRIPTS/wt-release.sh" "$@"
+    _wt_run_python wt_release.py --workdir "$PWD" "$@"
 }
 
 
 wt-hotfix() {
-    bash "$WORKTREE_SCRIPTS/wt-hotfix.sh" "$@"
-    # Auto-cd to the new worktree
-    if [ $? -eq 0 ] && [ -n "$1" ]; then
-        local repo_root=$(git rev-parse --git-common-dir 2>/dev/null || git rev-parse --git-dir)
-        cd "$repo_root/_hotfix/$1" 2>/dev/null || true
+    local output rc worktree_path
+    output="$(_wt_run_python wt_hotfix.py --workdir "$PWD" "$@" 2>&1)"
+    rc=$?
+    printf '%s\n' "$output"
+    if [ "$rc" -eq 0 ]; then
+        worktree_path=$(printf '%s\n' "$output" | awk -F= '/^WORKTREE_PATH=/{print $2; exit}')
+        [ -n "$worktree_path" ] && [ -d "$worktree_path" ] && cd "$worktree_path" 2>/dev/null || true
     fi
+    return "$rc"
 }
 
 wt-hotfix-done() {
-    bash "$WORKTREE_SCRIPTS/wt-hotfix-done.sh" "$@"
+    _wt_run_python wt_hotfix_done.py --workdir "$PWD" "$@"
 }
 
 wt-hotfix-pr() {
-    bash "$WORKTREE_SCRIPTS/wt-hotfix-pr.sh" "$@"
-    if [ $? -eq 0 ] && [ -f /tmp/.wt-hotfix-pr-last-dir ]; then
-        local repo_root=$(git rev-parse --git-common-dir 2>/dev/null || git rev-parse --git-dir)
-        local wt_dir=$(cat /tmp/.wt-hotfix-pr-last-dir)
-        rm -f /tmp/.wt-hotfix-pr-last-dir
-        cd "$repo_root/$wt_dir" 2>/dev/null || true
+    local output rc worktree_path
+    output="$(_wt_run_python wt_hotfix_pr.py --workdir "$PWD" "$@" 2>&1)"
+    rc=$?
+    printf '%s\n' "$output"
+    if [ "$rc" -eq 0 ]; then
+        worktree_path=$(printf '%s\n' "$output" | awk -F= '/^WORKTREE_PATH=/{print $2; exit}')
+        [ -n "$worktree_path" ] && [ -d "$worktree_path" ] && cd "$worktree_path" 2>/dev/null || true
     fi
+    return "$rc"
 }
 
 # Sync current branch with develop (or another branch)
 wt-sync() {
-    bash "$WORKTREE_SCRIPTS/wt-sync.sh" "$@"
+    _wt_run_python wt_sync.py --workdir "$PWD" "$@"
+}
+
+wt-sync-permissions() {
+    _wt_run_python wt_sync_permissions.py --workdir "$PWD" "$@"
 }
 
 # ============================================================

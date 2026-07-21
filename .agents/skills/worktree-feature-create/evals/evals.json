@@ -1,0 +1,29 @@
+{
+  "skill_name": "worktree-feature-create",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a recruit-api feature worktree named mcp-calls-recruit-api-for-everything from develop.",
+      "expected_output": "Runs scripts/wt_feature.py --repo recruit-api mcp-calls-recruit-api-for-everything develop, which reads config.yaml for the worktrees root, prints WORKTREE_PATH, enters _feature/mcp-calls-recruit-api-for-everything, checks git status, and reports the path and dirty state.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I am in workbench but need to do code changes in example-service on branch change-runtime-to-use-recruit-api-as-pass-through.",
+      "expected_output": "Does not edit from workbench or a main/develop checkout. It derives or asks for the target repo, runs scripts/wt_feature.py for example-service and change-runtime-to-use-recruit-api-as-pass-through, enters the printed WORKTREE_PATH under _feature/change-runtime-to-use-recruit-api-as-pass-through, then checks branch and status before changes.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Create a backend feature worktree on Windows named RUN-1234-runtime-fix from main.",
+      "expected_output": "Uses scripts/wt_feature.py with a Windows Python launcher such as py -3, reads the configured worktrees root, prints WORKTREE_PATH, and avoids raw git worktree commands unless the Python implementation is unavailable and the user approves.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "I accidentally did work in develop in example-service. Take what was done in develop and make a worktree out of it, then continue there.",
+      "expected_output": "Inspects the dirty develop checkout, creates a feature worktree from develop with scripts/wt_feature.py, migrates staged/unstaged/untracked changes into the printed WORKTREE_PATH, verifies the intended diff in the feature worktree, continues implementation there, and does not clean develop until the user approves cleanup.",
+      "files": []
+    }
+  ]
+}

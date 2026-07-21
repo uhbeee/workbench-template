@@ -1,0 +1,17 @@
+{
+  "skill_name": "sync-permissions",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Show me which Claude permissions are missing globally across all worktrees.",
+      "expected_output": "Runs scripts/wt_sync_permissions.py --all --dry-run, reports SCANNED_FILES, MISSING_PERMISSIONS, and each PERMISSION without modifying global settings.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Promote all missing worktree permissions globally.",
+      "expected_output": "Runs a dry-run first, asks for explicit approval, then runs scripts/wt_sync_permissions.py --all --apply-all and reports ADDED.",
+      "files": []
+    }
+  ]
+}

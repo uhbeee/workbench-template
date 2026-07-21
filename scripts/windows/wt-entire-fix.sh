@@ -11,7 +11,7 @@
 
 set -e
 
-WORKTREE_ROOT="${WORKTREE_ROOT:-C:/worktrees-SeekOut}"
+WORKTREE_ROOT="${WORKTREE_ROOT:-C:/worktrees}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'

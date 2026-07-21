@@ -1,0 +1,23 @@
+{
+  "skill_name": "worktree-remove",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Remove the stale feature worktree old-search-experiment from example-service, but keep the branch.",
+      "expected_output": "Runs scripts/wt_remove.py with --dry-run first, reports WORKTREE_PATH, branch, dirty status, and exact confirmed command. It only removes after explicit user approval with --yes --keep-branch, and it does not delete the branch.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Delete the develop worktree.",
+      "expected_output": "Refuses because develop is protected. It does not call wt-remove or git worktree remove.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Remove all local worktrees that have been merged to develop.",
+      "expected_output": "Runs scripts/wt_remove.py --merged-to develop --dry-run first to inventory candidates across the relevant managed repo(s), reports clean merged candidates and skipped dirty/protected worktrees, asks before removal, then removes only clean managed worktrees with --yes --keep-branch unless branch deletion was explicitly requested.",
+      "files": []
+    }
+  ]
+}

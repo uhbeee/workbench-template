@@ -194,13 +194,10 @@ if $global_flag && [[ -n "$installed_name" ]]; then
     fi
   elif grep -q "^skills:" "$CONFIG" 2>/dev/null; then
     if ! grep -q "^ *global:" "$CONFIG" 2>/dev/null; then
-      sed_i '/^skills:/a\
-  global:\
-    - '"$installed_name" "$CONFIG"
+      sed -i '/^skills:/a\  global:\n    - '"$installed_name" "$CONFIG"
     else
       if ! grep -q "^ *- *${installed_name}$" "$CONFIG"; then
-        sed_i "/^ *global:/a\\
-    - $installed_name" "$CONFIG"
+        sed -i "/^ *global:/a\\    - $installed_name" "$CONFIG"
       fi
     fi
   else
@@ -210,15 +207,26 @@ if $global_flag && [[ -n "$installed_name" ]]; then
     echo "    - $installed_name" >> "$CONFIG"
   fi
 
-  # Create global junction
-  local src="$SKILLS_DIR/$installed_name"
-  local dst="$HOME/.claude/skills/$installed_name"
-  mkdir -p "$HOME/.claude/skills"
+  # Create global junctions for supported AI tools.
+  src="$SKILLS_DIR/$installed_name"
+  for skills_dst in "$HOME/.claude/skills" "$HOME/.codex/skills"; do
+    mkdir -p "$skills_dst"
+    dst="$skills_dst/$installed_name"
 
-  if ! is_link "$dst" && [[ ! -e "$dst" ]]; then
+    if is_link "$dst"; then
+      if [[ -d "$dst" ]]; then
+        continue
+      fi
+
+      remove_link "$dst"
+    elif [[ -e "$dst" ]]; then
+      warn "Global junction skipped: $dst already exists and is not a link"
+      continue
+    fi
+
     create_dir_link "$src" "$dst"
-    pass "Global junction created: ~/.claude/skills/$installed_name"
-  fi
+    pass "Global junction created: $dst"
+  done
 fi
 
 echo ""

@@ -43,7 +43,7 @@ Setup will:
 3. Create directory junctions from `.claude/` and `.cursor/` to `.agents/`
 4. Create a file symlink: `.claude/CLAUDE.md` -> `AGENTS.md`
 5. Configure your shell profile for worktree commands
-6. Set up global skills in `~/.claude/skills/` (available in every project)
+6. Set up global skills in `~/.claude/skills/` and `~/.codex/skills/` (available in every Claude Code and Codex project)
 7. Run skill validation to verify all skills are well-formed
 8. Run diagnostics to verify the environment
 
@@ -112,7 +112,7 @@ Junctions are gitignored and created by `scripts/setup.sh`.
 
 ### Global Skill Distribution
 
-Skills listed in `config.yaml: skills.global` are symlinked to `~/.claude/skills/`, making them available in every Claude Code project without duplication. Author a skill once in `.agents/skills/my-skill/SKILL.md`, run `setup-global-skills.sh`, and it works everywhere.
+Skills listed in `skills-global.yaml` are symlinked to `~/.claude/skills/` and `~/.codex/skills/`, making them available in every Claude Code and Codex project without duplication. Author a skill once in `.agents/skills/my-skill/SKILL.md`, run `setup-global-skills.sh`, and it works everywhere.
 
 ## Skills
 
@@ -323,7 +323,7 @@ workbench/
   scripts/
     lib.sh              # Shared cross-platform functions
     setup.sh            # One-command setup
-    setup-global-skills.sh  # Symlink skills to ~/.claude/skills/
+    setup-global-skills.sh  # Symlink skills to ~/.claude/skills/ and ~/.codex/skills/
     doctor.sh           # Environment diagnostics
     validate-skills.sh  # Skill validation (frontmatter, config, hooks)
     skill-add.sh        # Skill import

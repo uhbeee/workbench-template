@@ -1,22 +1,9 @@
-#!/bin/bash
-# wt-hotfix-done.sh - Remove a hotfix worktree (macOS)
-# Usage: wt-hotfix-done <name>
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKBENCH_ROOT="${WORKBENCH_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
-set -e
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-source "$SCRIPT_DIR/wt-lib.sh"
-
-name="$1"
-[[ -z "$name" ]] && { echo "Usage: wt-hotfix-done <name>"; exit 1; }
-
-repo_root=$(get_repo_root)
-cd "$repo_root"
-
-if [[ -d "_hotfix/$name" ]]; then
-    git worktree remove "_hotfix/$name" --force
-    git worktree prune
-    success "Hotfix removed: _hotfix/$name"
-else
-    err "Not found: _hotfix/$name"
-    exit 1
+if command -v python3 >/dev/null 2>&1; then
+  exec python3 "$WORKBENCH_ROOT/scripts/worktrees/wt_hotfix_done.py" "$@"
 fi
+exec python "$WORKBENCH_ROOT/scripts/worktrees/wt_hotfix_done.py" "$@"

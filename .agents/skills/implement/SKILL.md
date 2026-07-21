@@ -1,10 +1,11 @@
 ---
 name: implement
 description: Execute a forge plan step-by-step with test verification, progress tracking, and boundary checkpoints
-argument-hint: <plan-name>
+metadata:
+  workbench.argument-hint: "<plan-name>"
 ---
 
-> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
+> **Path resolution**: This skill may run from any repo. All `context/` and `config.yaml` paths are relative to the **workbench root**, not the current working directory. Read `~/.codex/workbench-root` or `~/.claude/workbench-root` to get the absolute workbench path, then prepend it to all `context/` and `config.yaml` references. See [PATHS.md](../../PATHS.md).
 
 # /implement — Structured Implementation
 
@@ -18,7 +19,7 @@ argument-hint: <plan-name>
 
 ### Step 0: Find the Plan
 
-Read `~/.claude/workbench-root` to get the workbench path.
+Read `~/.codex/workbench-root` or `~/.claude/workbench-root` to get the workbench path.
 
 1. **If plan name given** (`/implement <plan-name>`):
    - Read `<workbench>/context/plans/active/<plan-name>/handoff.md`

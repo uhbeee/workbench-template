@@ -4,7 +4,7 @@
 
 set -e
 
-WORKTREE_ROOT="${WORKTREE_ROOT:-C:/worktrees-SeekOut}"
+WORKTREE_ROOT="${WORKTREE_ROOT:-C:/worktrees}"
 
 repo_url=$1
 repo_name=${2:-$(basename "$repo_url" .git)}

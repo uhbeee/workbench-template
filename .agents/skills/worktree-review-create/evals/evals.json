@@ -1,0 +1,23 @@
+{
+  "skill_name": "worktree-review-create",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a review worktree for PR 123 in example-service.",
+      "expected_output": "Runs scripts/wt_review.py 123 --repo example-service, reports WORKTREE_PATH and BRANCH, gathers PR and diff anchors, creates WORKTREE_PATH/reviewer-packet.html using the inactive write-html PR/code-review reference when available, validates the HTML, and uses the review path for follow-up review commands.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Review the branch feature/runtime-pass-through locally.",
+      "expected_output": "Runs scripts/wt_review.py feature/runtime-pass-through from the target repo context or with --repo, refreshes _review/current, does not use the feature worktree workflow, and creates a reviewer-packet.html from local branch/diff anchors while clearly labeling any missing PR metadata.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Just create the review checkout for PR 42 in recruit-api; no packet yet.",
+      "expected_output": "Runs scripts/wt_review.py 42 --repo recruit-api, reports WORKTREE_PATH and BRANCH, skips reviewer-packet.html because the user explicitly requested checkout-only behavior, and provides the next command/path for later review.",
+      "files": []
+    }
+  ]
+}
