@@ -144,6 +144,7 @@ done
 header "Worktrees"
 
 worktree_root=$(parse_yaml_value "worktrees.root" 2>/dev/null || echo "")
+worktree_root="${worktree_root/#\~/$HOME}"
 if [[ -n "$worktree_root" ]]; then
   if [[ -d "$worktree_root" ]]; then
     check_pass "Worktree root exists: $worktree_root"

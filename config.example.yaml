@@ -128,7 +128,9 @@ calendar:
 # --- Worktree Management ---
 
 worktrees:
-  root: "C:/worktrees"
+  # "~" expands to your home directory on macOS, Linux, and Git Bash.
+  # Windows convention: "C:/worktrees"
+  root: "~/Developer/worktrees"
   defaults:
     standard:
       - main
