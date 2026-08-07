@@ -80,17 +80,19 @@ mkdir -p "$REPO_ROOT/.claude"
 mkdir -p "$REPO_ROOT/.cursor"
 
 # Directory junctions (no admin needed on Windows)
-declare -A DIR_JUNCTIONS=(
-  [".claude/agents"]=".agents/agents"
-  [".claude/hooks"]=".agents/hooks"
-  [".claude/skills"]=".agents/skills"
-  [".cursor/agents"]=".agents/agents"
-  [".cursor/hooks"]=".agents/hooks"
-  [".cursor/skills"]=".agents/skills"
+# ponytail: dst=src pairs instead of declare -A, bash 3.2 has no associative arrays
+DIR_JUNCTIONS=(
+  ".claude/agents=.agents/agents"
+  ".claude/hooks=.agents/hooks"
+  ".claude/skills=.agents/skills"
+  ".cursor/agents=.agents/agents"
+  ".cursor/hooks=.agents/hooks"
+  ".cursor/skills=.agents/skills"
 )
 
-for dst in "${!DIR_JUNCTIONS[@]}"; do
-  src="${DIR_JUNCTIONS[$dst]}"
+for pair in "${DIR_JUNCTIONS[@]}"; do
+  dst="${pair%%=*}"
+  src="${pair#*=}"
   full_dst="$REPO_ROOT/$dst"
   full_src="$REPO_ROOT/$src"
 
@@ -361,7 +363,12 @@ SKILL_TARGET_LABELS=(
   "Codex"
 )
 
-mapfile -t GLOBAL_SKILLS < <(parse_global_skills 2>/dev/null)
+# ponytail: while-read instead of mapfile, macOS ships bash 3.2
+GLOBAL_SKILLS=()
+while IFS= read -r skill; do
+  [[ -n "$skill" ]] || continue
+  GLOBAL_SKILLS+=("$skill")
+done < <(parse_global_skills 2>/dev/null)
 
 if [[ ${#GLOBAL_SKILLS[@]} -eq 0 ]]; then
   info "No global skills configured (check skills-global.yaml or config.yaml skills.global)"

@@ -24,7 +24,12 @@ SKILL_TARGET_LABELS=(
   "Codex"
 )
 
-mapfile -t SKILLS < <(parse_global_skills 2>/dev/null)
+# ponytail: while-read instead of mapfile, macOS ships bash 3.2
+SKILLS=()
+while IFS= read -r skill; do
+  [[ -n "$skill" ]] || continue
+  SKILLS+=("$skill")
+done < <(parse_global_skills 2>/dev/null)
 
 if [[ ${#SKILLS[@]} -eq 0 ]]; then
   echo "No global skills configured (check skills-global.yaml or config.yaml skills.global)."
@@ -40,9 +45,10 @@ total_skipped=0
 total_missing=0
 total_pruned=0
 
-declare -A CONFIGURED_SKILLS=()
+# ponytail: newline-delimited membership string, bash 3.2 has no associative arrays
+CONFIGURED_SKILLS=$'\n'
 for skill in "${SKILLS[@]}"; do
-  CONFIGURED_SKILLS["$skill"]=1
+  CONFIGURED_SKILLS+="$skill"$'\n'
 done
 
 prune_stale_workbench_skill_links() {
@@ -54,7 +60,7 @@ prune_stale_workbench_skill_links() {
     local skill_name target
     skill_name="$(basename "$dst")"
 
-    if [[ -n "${CONFIGURED_SKILLS[$skill_name]:-}" ]]; then
+    if [[ "$CONFIGURED_SKILLS" == *$'\n'"$skill_name"$'\n'* ]]; then
       continue
     fi
     if ! is_link "$dst"; then

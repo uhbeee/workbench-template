@@ -43,7 +43,12 @@ if [[ ! -f "$ALLOWLIST" ]]; then
   exit 1
 fi
 
-mapfile -t ALLOWED_PATHS < <(
+# ponytail: while-read instead of mapfile, macOS ships bash 3.2
+ALLOWED_PATHS=()
+while IFS= read -r path; do
+  [[ -n "$path" ]] || continue
+  ALLOWED_PATHS+=("$path")
+done < <(
   grep '^ *- ' "$ALLOWLIST" \
     | sed 's/^ *- *//; s/ *#.*//' \
     | tr -d '"' \
