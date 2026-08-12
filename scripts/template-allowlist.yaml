@@ -23,6 +23,7 @@ include:
   - .agents/skills/estimate/
   - .agents/skills/worktree-feature-create/
   - .agents/skills/hotfix/
+  - .agents/skills/hunk-diff-review/
   - .agents/skills/interrupt/
   - .agents/skills/jira-review/
   - .agents/skills/log-interrupt/

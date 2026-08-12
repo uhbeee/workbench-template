@@ -22,6 +22,7 @@ global:
   - worktree-feature-create
   - forge
   - hotfix
+  - hunk-diff-review
   - implement
   - interrupt
   - jira-review
