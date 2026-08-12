@@ -31,8 +31,13 @@ dependency on workbench `context/` or `config.yaml`.
 5. **No git state changes without explicit sign-off.** Do not `commit`, `reset`, `restore`, or
    `rebase` to set up or clean up the review. If you need to (e.g. revert your own premature
    edits so the review is preserved), propose it and wait for approval.
-6. **Apply approved edits one at a time.** After each, reload the diff and note that the user's
-   comments on edited lines may show as detached - that is expected and signals "addressed."
+6. **Apply all approved changes in one batch, at the very end.** Do NOT edit the document while
+   the review is still open. Wait until the user has closed out **every** comment/thread -
+   approved, denied, or closed - then apply all the approved changes together in a single pass
+   and reload the diff once. Editing mid-review shifts lines under the reviewer and forces
+   re-reading; batching at the end keeps their read stable and makes the applied set easy to see
+   at once. Track each thread's disposition (approved / denied / closed) so you know when the
+   review is fully resolved and exactly which changes to apply.
 
 ## Prerequisite: load the Hunk CLI skill
 
@@ -78,9 +83,11 @@ user; it is a prerequisite for this skill.)
 6. **Report the triage** back to the user: which comments were answered (resolve on read) and
    which are proposals awaiting approval. Ask them to approve however they like (reply on the
    Hunk note, or in chat - e.g. "do 61 and 70, skip 38").
-7. **Apply only approved changes**, one at a time. Edit the file, then
-   `hunk session reload <id> -- diff HEAD` so the user sees it. Leave everything else untouched.
-   Do not stage or commit unless the user tells you to.
+7. **Apply approved changes only after the whole review is resolved - all at once.** Do not edit
+   mid-review. Once the user has closed out every thread (approved / denied / closed), apply all
+   the approved changes in a single batch, then `hunk session reload <id> -- diff HEAD` once so
+   the user sees the final result. Leave everything not-approved untouched. Do not stage or
+   commit unless the user tells you to.
 
 ## Triage guide - reply vs propose
 
