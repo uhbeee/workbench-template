@@ -1,0 +1,19 @@
+# Per-Machine Skill Selection (optional)
+#
+# Copy to skills-local.yaml (gitignored) to control which of the skills in
+# skills-global.yaml get installed on THIS machine. Without the file, all
+# global skills are installed.
+#
+# Selection is declarative: on the next setup-global-skills.sh run,
+# deselected workbench skills have their links pruned from every harness
+# directory in skill-targets.yaml.
+#
+# Use ONE of the two lists (only: wins if both are present):
+
+# only:            # install just these
+#   - estimate
+#   - review-code
+
+# exclude:         # install everything except these
+#   - calendar-sync
+#   - morning-triage

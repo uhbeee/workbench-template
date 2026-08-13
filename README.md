@@ -118,6 +118,7 @@ update (skill-update.sh)   single source        (skill-targets.yaml)
 - **Import** (`/add-skill`): from a whole GitHub repo (`--list-skills` to enumerate, `--skills a,b` to pick, `--all`), a single-skill URL, a local path, or the registry. Imports are global by default; `--project` keeps a skill repo-only.
 - **Track** (`skills-lock.yaml`): every remote import records its repo, branch, path, and commit ref.
 - **Update** (`/update-skill`): re-fetches tracked skills from upstream. Clean updates apply and bump the lock ref; locally-modified skills are skipped with a diff unless `--force`.
+- **Select per machine** (`skills-local.yaml`, gitignored): optional `only:` or `exclude:` list filtering which global skills get installed on this machine — see `skills-local.example.yaml`. No file = install everything.
 - **Sync across machines:** `git pull && bash scripts/setup-global-skills.sh`.
 
 ## Skills

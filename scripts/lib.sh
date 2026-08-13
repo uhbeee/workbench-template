@@ -245,6 +245,36 @@ parse_global_skills() {
   fi
 }
 
+# ─── Skill Selection Helpers ──────────────────────────────────────────────
+
+SKILLS_LOCAL_FILE="$REPO_ROOT/skills-local.yaml"
+
+# parse_skills_local_list <key> — items under a top-level key (only/exclude)
+# in the optional, gitignored skills-local.yaml.
+parse_skills_local_list() {
+  local key="$1"
+  [[ -f "$SKILLS_LOCAL_FILE" ]] || return 0
+  # `|| true`: an absent key means "no filter", not an error (set -e/pipefail)
+  sed -n "/^${key}:/,/^[^ ]/p" "$SKILLS_LOCAL_FILE" \
+    | grep '^ *- ' | sed 's/^ *- *//; s/ *#.*//' | tr -d '"' | tr -d "'" || true
+}
+
+# Effective global skills for THIS machine: skills-global.yaml (the catalog)
+# filtered by skills-local.yaml — 'only:' keeps just the listed skills,
+# 'exclude:' drops the listed skills. No file = install everything.
+parse_effective_global_skills() {
+  local only exclude skill
+  only=$(parse_skills_local_list only)
+  exclude=$(parse_skills_local_list exclude)
+
+  while IFS= read -r skill; do
+    [[ -n "$skill" ]] || continue
+    if [[ -n "$only" ]] && ! grep -qx "$skill" <<< "$only"; then continue; fi
+    if [[ -n "$exclude" ]] && grep -qx "$skill" <<< "$exclude"; then continue; fi
+    echo "$skill"
+  done < <(parse_global_skills)
+}
+
 # ─── Skill Target Helpers ─────────────────────────────────────────────────
 
 SKILL_TARGETS_FILE="$REPO_ROOT/skill-targets.yaml"

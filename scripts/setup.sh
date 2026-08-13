@@ -366,7 +366,7 @@ GLOBAL_SKILLS=()
 while IFS= read -r skill; do
   [[ -n "$skill" ]] || continue
   GLOBAL_SKILLS+=("$skill")
-done < <(parse_global_skills 2>/dev/null)
+done < <(parse_effective_global_skills 2>/dev/null)
 
 if [[ ${#GLOBAL_SKILLS[@]} -eq 0 ]]; then
   info "No global skills configured (check skills-global.yaml or config.yaml skills.global)"

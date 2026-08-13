@@ -27,6 +27,7 @@ context/notes/scratch-*
 
 # Local overrides
 *.local.yaml
+skills-local.yaml
 context/repo-context/local.overrides.yaml
 secrets/
 

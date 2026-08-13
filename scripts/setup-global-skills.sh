@@ -26,7 +26,12 @@ SKILLS=()
 while IFS= read -r skill; do
   [[ -n "$skill" ]] || continue
   SKILLS+=("$skill")
-done < <(parse_global_skills 2>/dev/null)
+done < <(parse_effective_global_skills 2>/dev/null)
+
+if [[ -f "$SKILLS_LOCAL_FILE" ]]; then
+  echo "Local selection active (skills-local.yaml): installing ${#SKILLS[@]} skill(s)."
+  echo ""
+fi
 
 if [[ ${#SKILLS[@]} -eq 0 ]]; then
   echo "No global skills configured (check skills-global.yaml or config.yaml skills.global)."
