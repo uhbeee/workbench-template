@@ -20,7 +20,7 @@ This is **not** a code repository. It's where you think, plan, gather context, a
 - Python 3.x
 - [Claude Code](https://claude.ai/claude-code) CLI
 - GitHub CLI (`gh`) — optional but recommended
-- Hunk CLI (`hunk`) — optional, only needed for `/hunk-diff-review` live diff-review sessions
+- [Hunk](https://github.com/modem-dev/hunk) CLI (`hunk`) — optional, only needed for `/hunk-diff-review` live diff-review sessions
 
 ### Setup
 
