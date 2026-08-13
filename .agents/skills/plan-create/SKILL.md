@@ -99,14 +99,15 @@ The plan must include:
 - **Design decisions**: Key choices with rationale
 - **Open questions**: Anything that needs codebase exploration in the target repo
 
-#### Drafting Work Items (vertical slices)
+#### Drafting Work Items (lean toward vertical slices)
 
-Break the work into tracer-bullet tickets:
+Prefer tracer-bullet tickets **where feasible** — vertical slices are the default choice, not a mandate. When a ticket can be cut either way, it should be vertical; when a vertical slice isn't feasible, don't force it.
 
-- Each slice cuts a narrow but **complete** path through every layer it touches (schema, API, UI, tests) — vertical, not a horizontal slice of one layer.
+- A vertical slice cuts a narrow but **complete** path through every layer it touches (schema, API, UI, tests) — vertical, not a horizontal slice of one layer.
 - A completed slice is demoable or verifiable on its own.
-- Each slice is sized to fit a single fresh context window — one PR, one implementation session.
-- Any prefactoring lands first, as its own slice.
+- Slices can compose: several tickets may together form one vertical slice, just as all tickets together form the full feature. When you split a slice, give the group a verifiable end point and wire the pieces with blocking edges.
+- Each ticket is sized to fit a single fresh context window — one PR, one implementation session.
+- Any prefactoring lands first, as its own ticket.
 - Give each ticket its **blocking edges** — the tickets that must complete before it can start. A ticket with no blockers can start immediately.
 
 **Wide refactors are the exception to vertical slicing.** A wide refactor is one mechanical change — rename a column, retype a shared symbol — whose blast radius fans across the whole codebase, so a single edit breaks thousands of call sites at once and no vertical slice can land green. Don't force it into a tracer bullet; sequence it as **expand–contract**:
@@ -150,7 +151,7 @@ The handoff prompt is a self-contained document designed to be pasted into a Cla
 ## Key Principles
 
 - **Interview depth over speed.** A 15-minute interview saves days of wrong-direction implementation. Don't rush it.
-- **Vertical slices, PR-level granularity.** Each work item is a tracer bullet — a complete, demoable path through the stack that maps to a single PR. Vague items like "implement the feature" and horizontal layer-by-layer items like "build all the endpoints" are both useless.
+- **Vertical slices where feasible, PR-level granularity always.** Lean toward tracer bullets — complete, demoable paths through the stack — but don't force one when it isn't feasible; a group of tickets can form the slice together. Every item still maps to a single PR. Vague items like "implement the feature" and gratuitously horizontal items like "build all the endpoints" are both useless.
 - **The handoff is the product.** The plan is for the user. The handoff is for the implementation session. Both must be complete and self-contained.
 - **HTML is the plan surface.** Use Markdown only as a short compatibility/index file when another skill expects it.
 - **Reference the evidence.** When making claims in the plan, reference findings from `research.html` and `analysis.html`, using Markdown fallbacks only for legacy plans. Don't assert things that weren't established during research.
