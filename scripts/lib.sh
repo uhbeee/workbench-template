@@ -245,6 +245,24 @@ parse_global_skills() {
   fi
 }
 
+# ─── Skill Target Helpers ─────────────────────────────────────────────────
+
+SKILL_TARGETS_FILE="$REPO_ROOT/skill-targets.yaml"
+
+# Parse harness skill directories from skill-targets.yaml (one per line,
+# ~ expanded). Falls back to Claude Code + Codex when the file is absent.
+parse_skill_targets() {
+  local dir
+  if [[ -f "$SKILL_TARGETS_FILE" ]]; then
+    while IFS= read -r dir; do
+      [[ -n "$dir" ]] || continue
+      echo "${dir/#\~/$HOME}"
+    done < <(grep '^ *- ' "$SKILL_TARGETS_FILE" | sed 's/^ *- *//; s/ *#.*//' | tr -d '"' | tr -d "'" | sed 's/ *$//')
+  else
+    printf '%s\n' "$HOME/.claude/skills" "$HOME/.codex/skills"
+  fi
+}
+
 # ─── Output Helpers ────────────────────────────────────────────────────────
 
 # Colored output

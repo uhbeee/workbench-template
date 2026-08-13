@@ -31,6 +31,7 @@ include:
   - .agents/skills/meeting-prep/
   - .agents/skills/morning-triage/
   - .agents/skills/add-skill/
+  - .agents/skills/update-skill/
   - .agents/skills/agent-flow/
   - .agents/skills/brainstorm/
   - .agents/skills/forge/
@@ -70,6 +71,8 @@ include:
   - scripts/setup.sh
   - scripts/doctor.sh
   - scripts/skill-add.sh
+  - scripts/skill-update.sh
+  - skill-targets.yaml
   - scripts/setup-global-skills.sh
   - scripts/template-sync.sh
   - scripts/skill-registry.yaml

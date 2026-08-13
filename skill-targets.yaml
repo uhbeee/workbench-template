@@ -1,0 +1,13 @@
+# Skill Targets
+#
+# Harness skill directories that receive links to .agents/skills.
+# Consumed by setup-global-skills.sh, setup.sh, and skill-add.sh.
+# "~" expands to your home directory on macOS, Linux, and Git Bash.
+#
+# To deliver skills to another harness (opencode, herdr, ...), add its
+# skill directory here and re-run scripts/setup-global-skills.sh.
+
+targets:
+  - ~/.claude/skills   # Claude Code
+  - ~/.codex/skills    # Codex
+  - ~/.cursor/skills   # Cursor

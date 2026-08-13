@@ -355,14 +355,11 @@ fi
 header "Global Skills"
 
 SKILLS_SRC="$REPO_ROOT/.agents/skills"
-SKILL_TARGET_DIRS=(
-  "$HOME/.claude/skills"
-  "$HOME/.codex/skills"
-)
-SKILL_TARGET_LABELS=(
-  "Claude Code"
-  "Codex"
-)
+SKILL_TARGET_DIRS=()
+while IFS= read -r target_dir; do
+  [[ -n "$target_dir" ]] || continue
+  SKILL_TARGET_DIRS+=("$target_dir")
+done < <(parse_skill_targets)
 
 # ponytail: while-read instead of mapfile, macOS ships bash 3.2
 GLOBAL_SKILLS=()
@@ -379,7 +376,7 @@ else
 
   for i in "${!SKILL_TARGET_DIRS[@]}"; do
     skills_dst="${SKILL_TARGET_DIRS[$i]}"
-    label="${SKILL_TARGET_LABELS[$i]}"
+    label="${SKILL_TARGET_DIRS[$i]}"
     mkdir -p "$skills_dst"
 
     created=0

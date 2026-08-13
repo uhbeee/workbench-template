@@ -58,3 +58,4 @@ global:
   - worktree-review-create
   - worktree-sync
   - wrap-up
+  - update-skill
