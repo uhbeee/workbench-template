@@ -7,7 +7,7 @@ This is **not** a code repository. It's where you think, plan, gather context, a
 ## What's Inside
 
 - **Agents** (`.agents/agents/`) — 20 AI agent definitions for daily workflows: morning triage, weekly planning, estimation, Jira/Confluence/Slack integration, PR review, and more.
-- **Skills** (`.agents/skills/`) — 60 invocable skills covering operational planning, code review, security scanning, QA, implementation, shipping, and meta-workflows.
+- **Skills** (`.agents/skills/`) — 62 invocable skills covering operational planning, code review, security scanning, QA, implementation, shipping, and meta-workflows.
 - **Hooks** (`.agents/hooks/`) — Session lifecycle hooks that inject daily context, log Slack messages, check plan status, and suggest code review before commits.
 - **Scripts** (`scripts/`) — Cross-platform shell scripts for setup, diagnostics, skill validation, worktree management, and template sync.
 - **Context** (`context/`) — Daily plans, weekly plans, calendar data, quarterly goals, feature plans, and archived history.
@@ -266,6 +266,8 @@ Includes a rationalization-blocking table (from [superpowers](https://github.com
 | `/template-sync` | Sync safe content to public template repo |
 | `/calendar-sync` | Read Outlook calendar via Chrome for capacity planning |
 | `/status-report` | Generate stakeholder-ready status update by quarterly goals |
+| `/quick-recap` | Red/yellow/green final status block convention for agent responses |
+| `/stay-within-limits` | Pace long-running or parallel agent work against usage limits |
 
 ## Hooks
 
@@ -327,7 +329,7 @@ The code review and quality skills incorporate patterns from:
 workbench/
   .agents/              # Canonical AI tooling
     agents/             # 20 agent definitions
-    skills/             # 60 skill definitions
+    skills/             # 62 skill definitions
     hooks/              # 7 hook scripts
     mcp.json            # MCP server config
   .claude/              # Claude Code (junctions + settings)
