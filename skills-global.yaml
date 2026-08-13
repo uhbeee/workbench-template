@@ -59,3 +59,11 @@ global:
   - worktree-sync
   - wrap-up
   - update-skill
+  - handoff
+  - plan-implement
+  - plan-sync
+  - claude-api
+  - pr-create
+  - db-design-interview
+  - quick-recap
+  - stay-within-limits

@@ -32,6 +32,12 @@ include:
   - .agents/skills/morning-triage/
   - .agents/skills/add-skill/
   - .agents/skills/update-skill/
+  - .agents/skills/handoff/
+  - .agents/skills/plan-implement/
+  - .agents/skills/plan-sync/
+  - .agents/skills/pr-create/
+  - .agents/skills/quick-recap/
+  - .agents/skills/stay-within-limits/
   - .agents/skills/agent-flow/
   - .agents/skills/brainstorm/
   - .agents/skills/forge/
