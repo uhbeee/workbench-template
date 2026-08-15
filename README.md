@@ -21,6 +21,7 @@ This is **not** a code repository. It's where you think, plan, gather context, a
 - [Claude Code](https://claude.ai/claude-code) CLI
 - GitHub CLI (`gh`) — optional but recommended
 - [Hunk](https://github.com/modem-dev/hunk) CLI (`hunk`) — optional, only needed for `/hunk-diff-review` live diff-review sessions
+- Node.js (`npx`) — optional, only needed for `/lavish` HTML artifact review sessions (runs [lavish-axi](https://github.com/kunchenguid/lavish-axi) on demand)
 
 ### Setup
 

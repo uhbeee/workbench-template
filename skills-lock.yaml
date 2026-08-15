@@ -1,0 +1,11 @@
+# Skills Lock
+#
+# Provenance of imported skills — managed by scripts/skill-add.sh.
+# scripts/skill-update.sh uses these entries to pull upstream changes.
+
+skills:
+  lavish:
+    repo: kunchenguid/lavish-axi
+    branch: main
+    path: skills/lavish
+    ref: e915943
