@@ -123,6 +123,20 @@ update (skill-update.sh)   single source        (skill-targets.yaml)
 - **Select per machine** (`skills-local.yaml`, gitignored): optional `only:` or `exclude:` list filtering which global skills get installed on this machine — see `skills-local.example.yaml`. No file = install everything.
 - **Sync across machines:** `git pull && bash scripts/setup-global-skills.sh`.
 
+#### Updating imported skills
+
+```bash
+bash scripts/skill-update.sh                 # check every tracked skill, apply clean updates
+bash scripts/skill-update.sh lavish          # check one skill
+bash scripts/skill-update.sh lavish --force  # take upstream over local modifications
+```
+
+A skill that is locally modified AND changed upstream is never overwritten silently — the
+script prints the diff and skips it until you re-run with `--force` (or keep your version).
+A successful update bumps the skill's `ref` in `skills-lock.yaml`; commit that change so
+other machines pick up the same version. In an agent session, `/update-skill` drives the
+same flow interactively. Skills imported from a local path have no upstream and are skipped.
+
 ## Skills
 
 ### Operational Planning
