@@ -9,3 +9,8 @@ skills:
     branch: main
     path: skills/lavish
     ref: e915943
+  i-have-adhd:
+    repo: ayghri/i-have-adhd
+    branch: main
+    path: skills/i-have-adhd
+    ref: e7555fc
