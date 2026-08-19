@@ -38,6 +38,8 @@ include:
   - .agents/skills/pr-create/
   - .agents/skills/quick-recap/
   - .agents/skills/stay-within-limits/
+  - .agents/skills/lavish/
+  - .agents/skills/i-have-adhd/
   - .agents/skills/agent-flow/
   - .agents/skills/brainstorm/
   - .agents/skills/forge/
